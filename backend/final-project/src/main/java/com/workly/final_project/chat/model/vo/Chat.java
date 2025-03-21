@@ -16,8 +16,8 @@ public class Chat {
 	private int chatNo;
 	private int chatRoomNo;
 	private String message;
-	//private LocalDateTime receivedDate;
 	private String receivedDate;
 	private int userNo;
 	private String userName;
+	private int unreadCount;
 }

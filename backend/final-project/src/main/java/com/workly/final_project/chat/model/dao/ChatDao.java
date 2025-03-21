@@ -67,10 +67,6 @@ public class ChatDao {
         return sqlSession.selectList("chat.getChatList", userNo);
     }
 
-    // ✅ 채팅 메시지 목록 조회 (파일 포함)
-    public List<Chat> getChatMessagesWithFiles(int chatRoomNo) {
-        return sqlSession.selectList("chat.getChatMessagesWithFiles", chatRoomNo);
-    }
 
     // ✅ 특정 채팅방 참여자의 userNo 리스트 조회
     public List<Integer> getUserNosByChatRoom(int chatRoomNo) {
