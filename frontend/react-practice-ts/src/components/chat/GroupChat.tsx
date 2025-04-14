@@ -16,7 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 
-const backendHost = "192.168.130.8"; 
+const backendHost = "192.168.200.142"; 
 
 dayjs.extend(utc);
 
@@ -35,6 +35,7 @@ interface ChatMessage {
   receivedDate: string;
   isMine: boolean;
   lastReadChatNo?: number;
+  unreadCount?: number;
 }
 
 interface NotificationData {
@@ -65,7 +66,9 @@ const GroupChat = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [lastReadChatNo, setLastReadChatNo] = useState<number | null>(null);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [unreadCounts, setUnreadCounts] = useState<{ [chatNo: number]: number }>({});
+  //const [unreadCount, setUnreadCount] = useState<number>(0);
+
   
 
   const showNotification = (notification : NotificationData) => {
@@ -222,6 +225,15 @@ useEffect(() => {
         profileImg: profileMap[msg.userNo] || profile, // 기본 이미지 설정
         isMine: msg.userNo === currentUser.userNo, // ✅ 내 메시지 여부
       }));
+
+      // 여기서 unreadCounts 초기값도 세팅
+      const initialUnreadCounts: { [chatNo: number]: number } = {};
+      response.data.forEach((msg: ChatMessage) => {
+        if (typeof msg.unreadCount === "number") {
+          initialUnreadCounts[msg.chatNo] = msg.unreadCount;
+        }
+      });
+      setUnreadCounts(initialUnreadCounts);
   
       setChatMessages(messagesWithProfile);
     } catch (error) {
@@ -382,64 +394,73 @@ useEffect(() => {
       client.unsubscribe(subscriptionRef.current);
   }
 
-  // 채팅 메시지 구독
-  const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-      console.log("📩 새 메시지 수신:", message.body);
-      const newMessage = JSON.parse(message.body);
+// 채팅 메시지 구독
+const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
+    console.log("📩 새 메시지 수신:", message.body);
+    const newMessage = JSON.parse(message.body);
 
-      setChatMessages((prev) => [
-          ...prev,
-          { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-      ]);
+    // ✅ UNREAD_UPDATE는 메시지 아님 → 무시하거나 별도로 처리
+    if (newMessage.type === "UNREAD_UPDATE") {
+      setUnreadCounts(prev => ({
+        ...prev,
+        [newMessage.chatNo]: newMessage.unreadCount
+      }));
+      return;
+    }
+    
 
-      if (newMessage.userNo !== currentUser.userNo) {
-          updateUserChatStatus(newMessage.chatNo);
-      }
-  });
+    setChatMessages((prev) => [
+        ...prev,
+        { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
+    ]);
 
-  // 안 읽은 메시지 개수 업데이트 구독
-  const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}`, (message) => {
-      console.log("📩 안 읽은 메시지 개수 업데이트:", message.body);
-      setUnreadCount(JSON.parse(message.body));
-  });
+    if (newMessage.userNo !== currentUser.userNo) {
+        updateUserChatStatus(newMessage.chatNo);
+    }
+});
 
-  subscriptionRef.current = chatSubscription.id;
+// 안 읽은 메시지 개수 업데이트 구독
+const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}`, (message) => {
+    console.log("📩 안 읽은 메시지 개수 업데이트:", message.body);
+    setUnreadCount(JSON.parse(message.body));
+});
 
-  return () => {
-      chatSubscription.unsubscribe();
-      unreadSubscription.unsubscribe();
-  };
+subscriptionRef.current = chatSubscription.id;
+
+return () => {
+    chatSubscription.unsubscribe();
+    unreadSubscription.unsubscribe();
+};
 }, [room.chatRoomNo, client]);
 
   
-  
 
   
-  // ✅ 메시지 전송 함수
-  const sendMessage = () => {
-    if (!client || !client.connected || !inputMessage.trim()) return;
-  
-    // 현재 한국 로컬시간을 UTC로 변환한 후 "YYYY-MM-DD HH:mm:ss"로 포맷
-    const chatMessage = {
-      chatRoomNo: room.chatRoomNo,
-      userNo: currentUser.userNo,
-      userName: currentUser.userName,
-      message: inputMessage,
-      receivedDate: dayjs().utc().format("YYYY-MM-DD HH:mm:ss")
-    };
-  
-    console.log("📤 [프론트엔드] WebSocket으로 메시지 전송:", chatMessage);
-    try {
-      client.publish({
-        destination: `/pub/chat/sendMessage/${room.chatRoomNo}`,
-        body: JSON.stringify(chatMessage),
-      });
-      console.log("✅ [프론트엔드] WebSocket 메시지 전송 성공");
-      setInputMessage("");
-      updateUserChatStatus();
-    } catch (error) {
-      console.error("❌ [프론트엔드] WebSocket 메시지 전송 실패", error);
-    }
+// ✅ 메시지 전송 함수
+const sendMessage = () => {
+  if (!client || !client.connected || !inputMessage.trim()) return;
+
+  // 현재 한국 로컬시간을 UTC로 변환한 후 "YYYY-MM-DD HH:mm:ss"로 포맷
+  const chatMessage = {
+    chatRoomNo: room.chatRoomNo,
+    userNo: currentUser.userNo,
+    userName: currentUser.userName,
+    message: inputMessage,
+    receivedDate: dayjs().utc().format("YYYY-MM-DD HH:mm:ss")
+  };
+
+  console.log("📤 [프론트엔드] WebSocket으로 메시지 전송:", chatMessage);
+  try {
+    client.publish({
+      destination: `/pub/chat/sendMessage/${room.chatRoomNo}`,
+      body: JSON.stringify(chatMessage),
+    });
+    console.log("✅ [프론트엔드] WebSocket 메시지 전송 성공");
+    setInputMessage("");
+    updateUserChatStatus();
+  } catch (error) {
+    console.error("❌ [프론트엔드] WebSocket 메시지 전송 실패", error);
+  }
   };
   
 
@@ -496,6 +517,48 @@ useEffect(() => {
 }, [room.chatRoomNo, currentUser.userNo]);  // ✅ 채팅방이 변경될 때마다 실행
 
 
+
+// 실시간 채팅 상대방 안읽음 메세지 수 처리
+// ✅ 새 메시지가 추가될 때마다, 안 읽은 메시지를 읽음 처리 
+useEffect(() => {
+  if (!client || !client.connected || chatMessages.length === 0) return;
+
+  const unreadMessages = chatMessages.filter(
+    (msg) =>
+      msg.chatNo > (lastReadChatNo || 0) &&  // 아직 안 읽은 메시지
+      msg.userNo !== currentUser.userNo     // 내가 보낸 메시지 제외
+  );
+
+  if (unreadMessages.length === 0) return;
+
+  const latestUnread = unreadMessages[unreadMessages.length - 1];
+
+  const payload = {
+    chatRoomNo: room.chatRoomNo,
+    userNo: currentUser.userNo,
+    lastReadChatNo: latestUnread.chatNo
+  };
+
+  client.publish({
+    destination: "/pub/chat/read",
+    body: JSON.stringify(payload),
+  });
+
+  client.publish({
+    destination: "/pub/chat/enter", // 채팅방 입장시
+    body: JSON.stringify(payload),
+  });
+
+  console.log("📤 [프론트엔드] 읽음 이벤트 전송:", payload);
+  setLastReadChatNo(latestUnread.chatNo);
+}, [chatMessages]);
+  
+    
+  
+
+
+
+
 const isUnread = (msg: ChatMessage) => {
   return lastReadChatNo !== null && msg.chatNo > lastReadChatNo;
 };
@@ -521,7 +584,7 @@ const isUnread = (msg: ChatMessage) => {
     if (msg.userName === "SYSTEM") {
       return (
         <div
-          key={msg.chatNo ? msg.chatNo : `sys-${index}`}
+        key={`sys-${index}`}
           style={{
             display: "flex",
             alignItems: "center",
@@ -570,7 +633,7 @@ const isUnread = (msg: ChatMessage) => {
 
     return (
       <div
-        key={msg.chatNo ? msg.chatNo : `msg-${index}`}
+        key={`chat-${msg.chatNo}-${msg.userNo}`}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -622,9 +685,16 @@ const isUnread = (msg: ChatMessage) => {
         )}
 
             {/* ✅ 안 읽은 메시지 표시 */}
-            {unread && (
-                <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>{unreadCount > 0 && `안 읽은 메시지: ${unreadCount}개`}</div>
+            {/* {unread && (
+                <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>{ `안 읽은 메시지: ${unreadCounts[msg.chatNo]}개`}</div>
+            )} */}
+            {!msg.isMine && typeof unreadCounts[msg.chatNo] === 'number' && unreadCounts[msg.chatNo] > 0 && (
+              <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>
+                안 읽은 메시지: {unreadCounts[msg.chatNo]}개
+              </div>
             )}
+
+
 
             {!msg.isMine && !isSameUserAsBefore && (
               <div style={{ display: "flex", alignItems: "center", marginTop: "3px" }}>

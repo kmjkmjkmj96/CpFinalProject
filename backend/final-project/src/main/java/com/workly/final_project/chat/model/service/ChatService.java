@@ -57,6 +57,11 @@ public interface ChatService {
 
 		// 사내공지 채팅방
 		void createDefaultChatRoom();
+		
+		// 실시간 안읽음 갯수 업데이트
+		List<Integer> getChatNosToUpdate(int chatRoomNo, int lastReadChatNo);
+		int getUnreadCount(int chatRoomNo, int chatNo);
+
 
 		
 

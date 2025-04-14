@@ -117,10 +117,6 @@ public class ChatServiceImpl implements ChatService {
         return chatDao.getUserNosByChatRoom(chatRoomNo);
     }
 
-//    @Override
-//    public void insertOrUpdateUserChat(UserChat userChat) {
-//        chatDao.insertOrUpdateUserChat(userChat);
-//    }
 
     @Override
     public int getLastReadChatNo(int userNo, int chatRoomNo) {
@@ -296,6 +292,19 @@ public class ChatServiceImpl implements ChatService {
 	    } else {
 	        log.info("기본 채팅방(0번)이 이미 존재합니다.");
 	    }
+	}
+
+	
+	// 실시간 안읽음 갯수 업데이트
+	@Override
+	public List<Integer> getChatNosToUpdate(int chatRoomNo, int lastReadChatNo) {
+		return chatDao.getChatNosToUpdate(chatRoomNo, lastReadChatNo);
+	}
+
+	@Override
+	public int getUnreadCount(int chatRoomNo, int chatNo) {
+		return chatDao.getUnreadCount(chatRoomNo, chatNo);
+	
 	}
 
 

@@ -128,10 +128,30 @@ public class StompController {
         }
     }
     @MessageMapping("/chat/enter")
-    public void enterChatRoom(@Payload int chatRoomNo, Principal principal) {
-        int userNo = Integer.parseInt(principal.getName());
-        chatService.enterChatRoom(userNo, chatRoomNo);
+    public void handleEnterChatRoom(@Payload UserChat userChat) {
+        log.info("📥 채팅방 입장: {}", userChat);
+
+        // 1. DB에 lastReadChatNo 업데이트
+        chatService.enterChatRoom(userChat.getUserNo(), userChat.getChatRoomNo());
+
+        // 2. 해당 채팅방의 가장 최신 chatNo 조회
+        int latestChatNo = chatService.getLastChatNo(userChat.getChatRoomNo());
+
+        // 3. lastReadChatNo 이하의 chatNo들 조회
+        List<Integer> affectedChatNos = chatService.getChatNosToUpdate(userChat.getChatRoomNo(), latestChatNo);
+
+        for (Integer chatNo : affectedChatNos) {
+            int unreadCount = chatService.getUnreadCount(userChat.getChatRoomNo(), chatNo);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "UNREAD_UPDATE");
+            response.put("chatNo", chatNo);
+            response.put("unreadCount", unreadCount);
+
+            messagingTemplate.convertAndSend("/sub/chatRoom/" + userChat.getChatRoomNo(), response);
+        }
     }
+
     // 마지막으로 읽은 번호 가지고 오기
     @GetMapping("/api/chat/lastRead/{chatRoomNo}/{userNo}")
     public ResponseEntity<Integer> getLastReadChatNo(
@@ -154,4 +174,30 @@ public class StompController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 저장 실패");
         }
     }
+    
+    
+    @MessageMapping("/chat/read")
+    public void handleChatRead(@Payload UserChat userChat) {
+        log.info("읽음 처리 요청: {}", userChat);
+
+        // 1. DB에 읽음 상태 업데이트
+        chatService.updateUserChatStatus(userChat.getUserNo(), userChat.getChatRoomNo(), userChat.getLastReadChatNo());
+
+        // 2. lastReadChatNo 이하의 메시지들 조회
+        List<Integer> affectedChatNos = chatService.getChatNosToUpdate(userChat.getChatRoomNo(), userChat.getLastReadChatNo());
+
+        // 3. 각 메시지에 대해 unreadCount 재계산 후 broadcast
+        for (Integer chatNo : affectedChatNos) {
+            int unreadCount = chatService.getUnreadCount(userChat.getChatRoomNo(), chatNo);
+
+            Map<String, Object> updateMessage = new HashMap<>();
+            updateMessage.put("type", "UNREAD_UPDATE");
+            updateMessage.put("chatNo", chatNo);
+            updateMessage.put("unreadCount", unreadCount);
+
+            messagingTemplate.convertAndSend("/sub/chatRoom/" + userChat.getChatRoomNo(), updateMessage);
+        }
+    }
+
+    
 }

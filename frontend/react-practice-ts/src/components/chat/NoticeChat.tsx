@@ -5,7 +5,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/ko";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -47,12 +47,12 @@ const formatDate = (dateTimeString: string) => {
   return dayjs.utc(dateTimeString, "YYYY-MM-DD HH:mm:ss").local().format("YYYY년 MM월 DD일 dddd");
 };
 
-function getDateKey(dateString: string): string | null {
-  if (!dateString) return null;
-  const parsed = dayjs.utc(dateString, "YYYY-MM-DD HH:mm:ss");
-  if (!parsed.isValid()) return null;
-  return parsed.local().format("YYYY-MM-DD");
-}
+// function getDateKey(dateString: string): string | null {
+//   if (!dateString) return null;
+//   const parsed = dayjs.utc(dateString, "YYYY-MM-DD HH:mm:ss");
+//   if (!parsed.isValid()) return null;
+//   return parsed.local().format("YYYY-MM-DD");
+// }
 
 const NoticeChat: React.FC<NoticeChatProps> = ({ onClose }) => {
   const currentUser = useSelector((state: RootState) => state.user);

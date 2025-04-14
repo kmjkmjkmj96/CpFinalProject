@@ -128,7 +128,15 @@
 	        TO_CHAR(C.RECEIVED_DATE, 'YYYY-MM-DD HH24:MI:SS') AS receivedDate,
 	        C.USER_NO AS userNo,  
 	        C.USER_NAME AS userName,
-	        (SELECT PROFILE_IMG FROM CHAT_PROFILE WHERE USER_NO = C.USER_NO) AS profileImg
+	        (SELECT PROFILE_IMG FROM CHAT_PROFILE WHERE USER_NO = C.USER_NO) AS profileImg,
+	        
+	        (
+				SELECT COUNT(*)
+				FROM USER_CHAT UC
+				WHERE UC.CHAT_ROOM_NO = C.CHAT_ROOM_NO
+				  AND UC.LAST_READ_CHAT_NO &lt; C.CHAT_NO
+			)AS unreadCount
+			
 	    FROM CHAT C
 	    WHERE C.CHAT_ROOM_NO = #{chatRoomNo}
 	    ORDER BY C.CHAT_NO ASC, C.RECEIVED_DATE ASC
@@ -271,6 +279,19 @@
 	    SELECT COUNT(*) FROM CHAT_ROOM WHERE CHAT_ROOM_NO = 0
 	</select>
 
+	<select id="getChatNosToUpdate" parameterType="map" resultType="int">
+	    SELECT CHAT_NO
+	    FROM CHAT
+	    WHERE CHAT_ROOM_NO = #{chatRoomNo}
+	      AND CHAT_NO &lt;= #{lastReadChatNo}
+	</select>
+	
+	<select id="getUnreadCount" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM USER_CHAT
+	    WHERE CHAT_ROOM_NO = #{chatRoomNo}
+	      AND LAST_READ_CHAT_NO &lt; #{chatNo}
+	</select>
 
 </mapper>
 
