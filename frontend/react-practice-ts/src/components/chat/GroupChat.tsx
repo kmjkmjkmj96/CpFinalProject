@@ -16,7 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 
-const backendHost = "192.168.200.142"; 
+const backendHost = "192.168.200.183"; 
 
 dayjs.extend(utc);
 
@@ -57,7 +57,6 @@ const GroupChat = ({
   room,
   currentUser,
   onClose,
-  messages = [],
   setIsAddMemberPanelOpen
 }: GroupChatProps) => {
   const [client, setClient] = useState<Client | null>(null);
@@ -67,7 +66,7 @@ const GroupChat = ({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [lastReadChatNo, setLastReadChatNo] = useState<number | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<{ [chatNo: number]: number }>({});
-  //const [unreadCount, setUnreadCount] = useState<number>(0);
+  
 
   
 
@@ -144,65 +143,21 @@ const GroupChat = ({
 }, [room.chatRoomNo]);
 
 
-  // ✅ WebSocket 연결 및 메시지 수신
-  useEffect(() => {
-    
-    const sock = new SockJS(`http://${backendHost}:8003/workly/ws-stomp`);
-
-    const stompClient = new Client({
-        webSocketFactory: () => sock,
-        reconnectDelay: 5000,
-        debug: (str) => console.log("🛠 [WebSocket Debug]:", str),
-        connectHeaders: {
-            userNo: currentUser.userNo.toString(),
-        },
-        onConnect: () => {
-            console.log("🟢 WebSocket Connected");
-
-            if (subscriptionRef.current) {
-                stompClient.unsubscribe(subscriptionRef.current);
-            }
-
-            const subscription = stompClient.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-                console.log("📩 새 메시지 수신:", message.body);
-                const newMessage = JSON.parse(message.body);
-                setChatMessages((prev) => [
-                    ...prev,
-                    { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-                ]);
-            });
-
-            subscriptionRef.current = subscription.id;
-            setClient(stompClient);
-        },
-        onDisconnect: () => console.log("🔴 WebSocket Disconnected"),
-    });
-
-    stompClient.activate();
-
-    return () => {
-        if (subscriptionRef.current) {
-            stompClient.unsubscribe(subscriptionRef.current);
-        }
-        stompClient.deactivate();
-    };
-}, [room.chatRoomNo]);
-
   // ✅ 날짜 및 시간 변환 함수
-  
   const formatTime = (dateTimeString: string) => {
     if (!dateTimeString) return "";
-    // 입력 문자열을 UTC로 해석하고, 현지 시간으로 변환한 후 HH:mm 형식으로 출력
-    return dayjs.utc(dateTimeString, "YYYY-MM-DD HH:mm:ss").local().format("HH:mm");
+    // “YYYY-MM-DD HH:mm:ss” 형식이 이미 KST라면, 그냥 그대로 포맷
+    return dayjs(dateTimeString, "YYYY-MM-DD HH:mm:ss")
+      .format("HH:mm");
   };
 
  // 날짜만 비교하기 위한 헬퍼 함수 (중복 제거)
-function getDateKey(dateString: string): string|null {
+function getDateKey(dateString: string): string | null {
   if (!dateString) return null;
-  const parsed = dayjs.utc(dateString, "YYYY-MM-DD HH:mm:ss");
+  const parsed = dayjs(dateString, "YYYY-MM-DD HH:mm:ss");
 
   if (!parsed.isValid()) return null;
-  return parsed.local().format("YYYY-MM-DD");
+  return parsed.format("YYYY-MM-DD");
 }
 
   
@@ -269,34 +224,6 @@ useEffect(() => {
   
 
 
-  
-  // 다른 방으로 이동
-  const leaveChatRoom = async () => {
-    try {
-        await axios.post(`http://${backendHost}:8003/workly/api/chat/leave/${room.chatRoomNo}/${currentUser.userNo}`);
-        console.log("🚪 [프론트엔드] leaveChatRoom 요청 완료");
-
-        // WebSocket 구독 해제
-        if (subscriptionRef.current && client) {
-            client.unsubscribe(subscriptionRef.current);
-        }
-
-    } catch (error) {
-        console.error("❌ [프론트엔드] leaveChatRoom 요청 실패:", error);
-    }
-};
-
-// 다른 채팅방으로 이동 시 호출
-// const handleRoomChange = async (newRoom: ChatRoom) => {
-//   try {
-//     await leaveChatRoom();  // 기존 방에서 나가기 (WebSocket 구독 해제)
-//     onChangeRoom(newRoom);  // ✅ 새로운 채팅방으로 변경
-//   } catch (error) {
-//     console.error("🚨 채팅방 변경 중 오류 발생:", error);
-//   }
-// };
-
-
 // 스크롤 하단으로
 useEffect(() => {
   if (chatContainerRef.current) {
@@ -307,7 +234,7 @@ useEffect(() => {
 const fetchUnreadMessages = async () => {
   try {
       const response = await axios.get(`http://${backendHost}:8003/workly/api/chat/unread/${room.chatRoomNo}/${currentUser.userNo}`);
-      setUnreadCount(response.data);
+      setUnreadCounts(response.data);
   } catch (error) {
       console.error("❌ [프론트엔드] 안 읽은 메시지 개수 불러오기 실패", error);
   }
@@ -356,36 +283,6 @@ useEffect(() => {
   }, []); // ✅ room.chatRoomNo 의존성 제거
   
   
-  
-
-
-  
-// 스크롤 하단으로
-useEffect(() => {
-  if (chatContainerRef.current) {
-    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-  }
-}, [chatMessages]);
-  // 채팅방을 구독하는 모두에게 전송?
-  const subscribeToChatRoom = () => {
-    if (!client || !client.connected) return;
-
-    client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-        console.log("📩 [프론트엔드] 새 메시지 수신:", message.body);
-        const newMessage = JSON.parse(message.body);
-
-        setChatMessages((prev) => [
-            ...prev,
-            { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-        ]);
-
-        // ✅ 안 읽은 메시지 개수 다시 가져오기
-        fetchUnreadMessages();
-    }, { userNo: currentUser.userNo.toString(), roomId: room.chatRoomNo.toString() });
-};
-
-  
-  
 useEffect(() => {
   if (!client || !client.connected) return;
 
@@ -422,7 +319,7 @@ const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (m
 // 안 읽은 메시지 개수 업데이트 구독
 const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}`, (message) => {
     console.log("📩 안 읽은 메시지 개수 업데이트:", message.body);
-    setUnreadCount(JSON.parse(message.body));
+    setUnreadCounts(JSON.parse(message.body));
 });
 
 subscriptionRef.current = chatSubscription.id;
@@ -446,7 +343,7 @@ const sendMessage = () => {
     userNo: currentUser.userNo,
     userName: currentUser.userName,
     message: inputMessage,
-    receivedDate: dayjs().utc().format("YYYY-MM-DD HH:mm:ss")
+    receivedDate: dayjs().format("YYYY-MM-DD HH:mm:ss")
   };
 
   console.log("📤 [프론트엔드] WebSocket으로 메시지 전송:", chatMessage);
@@ -516,6 +413,16 @@ useEffect(() => {
     updateUserChatStatus();
 }, [room.chatRoomNo, currentUser.userNo]);  // ✅ 채팅방이 변경될 때마다 실행
 
+useEffect(() => {
+  const savedCounts = localStorage.getItem(`unreadCounts_${room.chatRoomNo}`);
+  if (savedCounts) {
+    setUnreadCounts(JSON.parse(savedCounts));
+  }
+}, [room.chatRoomNo]);
+
+useEffect(() => {
+  localStorage.setItem(`unreadCounts_${room.chatRoomNo}`, JSON.stringify(unreadCounts));
+}, [unreadCounts, room.chatRoomNo]);
 
 
 // 실시간 채팅 상대방 안읽음 메세지 수 처리
@@ -525,43 +432,40 @@ useEffect(() => {
 
   const unreadMessages = chatMessages.filter(
     (msg) =>
-      msg.chatNo > (lastReadChatNo || 0) &&  // 아직 안 읽은 메시지
-      msg.userNo !== currentUser.userNo     // 내가 보낸 메시지 제외
+      msg.chatNo > (lastReadChatNo || 0) &&
+      msg.userNo !== currentUser.userNo
   );
 
   if (unreadMessages.length === 0) return;
 
   const latestUnread = unreadMessages[unreadMessages.length - 1];
 
+  if (lastReadChatNo && latestUnread.chatNo <= lastReadChatNo) return;
+
   const payload = {
     chatRoomNo: room.chatRoomNo,
     userNo: currentUser.userNo,
-    lastReadChatNo: latestUnread.chatNo
+    lastReadChatNo: latestUnread.chatNo,
   };
 
+  // ✅ read와 enter를 동시에 보내도 되지만 순서 주의
   client.publish({
     destination: "/pub/chat/read",
     body: JSON.stringify(payload),
   });
 
-  client.publish({
-    destination: "/pub/chat/enter", // 채팅방 입장시
-    body: JSON.stringify(payload),
-  });
+  // ✅ enter는 read 이후에
+  setTimeout(() => {
+    client.publish({
+      destination: "/pub/chat/enter",
+      body: JSON.stringify(payload),
+    });
+  }, 100); // 약간의 delay를 두면 더 안정적
 
-  console.log("📤 [프론트엔드] 읽음 이벤트 전송:", payload);
   setLastReadChatNo(latestUnread.chatNo);
-}, [chatMessages]);
-  
-    
-  
+}, [chatMessages, client]);
 
 
-
-
-const isUnread = (msg: ChatMessage) => {
-  return lastReadChatNo !== null && msg.chatNo > lastReadChatNo;
-};
 
   
 
@@ -624,7 +528,7 @@ const isUnread = (msg: ChatMessage) => {
 
     const nextMsg = chatMessages[index + 1];
     const isSameUserAsBefore = prevMsg && prevMsg.userNo === msg.userNo;
-    const unread = isUnread(msg);
+    
 
     // 시간을 표시할지 여부 (다음 메시지와 시간이 같으면 표시 생략)
     const showTime =
@@ -674,7 +578,7 @@ const isUnread = (msg: ChatMessage) => {
               {/* 원하는 형식으로 날짜 표시 (예: YYYY년 MM월 DD일 dddd) */}
               {dayjs
                 .utc(msg.receivedDate, "YYYY-MM-DD HH:mm:ss")
-                .local()
+                .locale("ko")
                 .format("YYYY년 MM월 DD일 dddd")}
             </div>
             <div
@@ -685,16 +589,11 @@ const isUnread = (msg: ChatMessage) => {
         )}
 
             {/* ✅ 안 읽은 메시지 표시 */}
-            {/* {unread && (
-                <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>{ `안 읽은 메시지: ${unreadCounts[msg.chatNo]}개`}</div>
-            )} */}
-            {!msg.isMine && typeof unreadCounts[msg.chatNo] === 'number' && unreadCounts[msg.chatNo] > 0 && (
+            {typeof unreadCounts[msg.chatNo] === 'number' && unreadCounts[msg.chatNo] > 0 && (
               <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>
                 안 읽은 메시지: {unreadCounts[msg.chatNo]}개
               </div>
             )}
-
-
 
             {!msg.isMine && !isSameUserAsBefore && (
               <div style={{ display: "flex", alignItems: "center", marginTop: "3px" }}>
@@ -714,7 +613,7 @@ const isUnread = (msg: ChatMessage) => {
                   {/* 서버에서 받은 프로필 이미지가 있으면 사용, 없으면 기본 이미지 사용 */}
                   <img
                     style={{ width: "22px", height: "22px", objectFit: "cover" }}
-                    src={msg.profileImg || profile}
+                    src={profile}
                     alt="profile"
                   />
                 </div>
@@ -780,10 +679,6 @@ const isUnread = (msg: ChatMessage) => {
                   </div>
                 )}
               </div>
-
-              {/* {isUnread && (
-                <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>안 읽음</div>
-              )} */}
             </div>
           );
         })}

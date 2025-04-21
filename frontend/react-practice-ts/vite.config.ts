@@ -9,6 +9,13 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      // 백엔드 context-path(/workly) 포함
+      '/workly/ws-stomp': {
+        target: 'http://localhost:8003',
+        changeOrigin: true,
+        ws: true,    // WebSocket 업그레이드 요청도 함께 프록시
+      },
+      // API 호출도 동일하게
       '/api': {
         target: 'http://localhost:8003',
         changeOrigin: true,

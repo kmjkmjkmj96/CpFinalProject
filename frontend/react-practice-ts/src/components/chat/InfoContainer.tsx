@@ -21,31 +21,6 @@ const InfoContainer = ({ children }: { children: React.ReactNode }) => {
         }}
       ></div>
 
-      {/* 헤더 영역 */}
-      {/* <div 
-        className="containerHeader" 
-        style={{ width: "390px", height: "30px", left: "0px", top: "0px", position: "absolute", background: "#4880FF" }}
-      ></div> */}
-
-      {/* <div 
-        className="containerHeaderLogoWrapper" 
-        style={{ 
-          position: "absolute", 
-          left: "12px", top: "7px",  
-          fontSize: "16px", fontFamily: "'Nunito Sans', sans-serif", fontWeight: "800",
-          color: "white", display: "inline-block" 
-        }}
-      >
-        사원정보
-        <div className="noticechat-close-icon" style={{
-            left: 359,
-            top: 22,
-            position: 'absolute',
-            cursor: "pointer"
-          }}  > 
-            ✕
-          </div>
-      </div> */}
 
       
       {/*  자식 컴포넌트가 들어가는 영역 */}

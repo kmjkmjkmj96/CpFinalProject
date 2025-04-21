@@ -21,6 +21,7 @@ import { ChatMessage } from "./type/chatType";
 import AddMemberPanel from "./components/chat/AddMemberPanel";
 import axios from "axios";
 import ChatModal from "./ChatModal";
+import { useStompClient } from "./StompContext";
 
 interface ChatRoom {
   chatRoomNo: number;
@@ -48,18 +49,7 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-
-  // ---------- 초기 메시지 isMine 여부 세팅 ----------
-  useEffect(() => {
-    console.log("📌 유저 변경 감지:", currentUser.userNo);
-    setChatMessages((prevMessages = []) =>
-      prevMessages.map(msg => ({
-        ...msg,
-        isMine: Number(msg.userNo) === Number(currentUser.userNo),
-      }))
-    );
-  }, [currentUser.userNo]);
+  
 
   // ---------- 여러 UI 상태 ----------
   const [isOpen, setIsOpen] = useState(true);
@@ -83,6 +73,55 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [isAddMemberPanelOpen, setIsAddMemberPanelOpen] = useState(false);
   const [currentMembers, setCurrentMembers] = useState<Member[]>([]);
+  
+  const client = useStompClient(); 
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  // ---------- 실시간 채팅 알림 -----------
+  // ① 컴포넌트 최상단에서 한 번만 훅 호출
+  const stompClient = useStompClient();
+  const chatRoomNo = selectedChatRoom?.chatRoomNo;
+
+  // ② useEffect 안에서는 이미 만들어둔 stompClient를 사용
+  useEffect(() => {
+    if (chatRoomNo === undefined) return;
+    if (!stompClient.connected) return;
+
+    const sub = stompClient.subscribe(
+      `/sub/chatRoom/${chatRoomNo}`,
+      frame => {
+        const payload = JSON.parse(frame.body);
+        // TODO: payload 처리 (chatMessages 업데이트 등)
+      }
+    );
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [stompClient, chatRoomNo]);
+
+  // ─── STOMP 구독: 선택된 채팅방의 메시지를 실시간으로 받기 ───
+  useEffect(() => {
+    if (chatRoomNo === undefined) return;
+
+    if (!client.connected) return;
+
+    const sub = client.subscribe(`/sub/chatRoom/${chatRoomNo}`, frame => {
+      const payload = JSON.parse(frame.body);
+      // TODO: 메시지/UNREAD_UPDATE 처리
+    });
+    return () => sub.unsubscribe();
+  }, [client, chatRoomNo]);
+
+  // ---------- 초기 메시지 isMine 여부 세팅 ----------
+  useEffect(() => {
+    console.log("📌 유저 변경 감지:", currentUser.userNo);
+    setChatMessages((prevMessages = []) =>
+      prevMessages.map(msg => ({
+        ...msg,
+        isMine: Number(msg.userNo) === Number(currentUser.userNo),
+      }))
+    );
+  }, [currentUser.userNo]);
 
   // ---------- 공지방 or 일반방 (초기값 0번 방) ----------
   const [activeChatRoom, setActiveChatRoom] = useState<ChatRoom | null>({
@@ -240,6 +279,10 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
       )
     );
   };
+
+  
+
+  
 
   // ---------- 특정 방의 멤버 목록 가져오기 ----------
   useEffect(() => {

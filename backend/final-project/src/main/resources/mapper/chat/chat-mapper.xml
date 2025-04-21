@@ -144,9 +144,6 @@
 
 
 
-
-	
-
 	<!-- UserChat 삽입 -->
     <insert id="insertUserChat" parameterType="UserChat">
         INSERT INTO USER_CHAT (USER_NO, CHAT_ROOM_NO, LAST_READ_CHAT_NO)

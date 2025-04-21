@@ -39,9 +39,11 @@ import AIAssistantPage from "./pages/AIAssistantPage";
 import CompanyEnrollPage from "./pages/CompanyEnrollPage";
 import RoleRoute from "./components/common/RoleRoute";
 import OrganizationChartPage from "./pages/OrganizationChartPage";
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { loginUser } from "./features/userSlice";
+import { toast, ToastContainer,  } from 'react-toastify';
+import { useStompClient } from "./StompContext";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -53,6 +55,7 @@ function App() {
   const currentUser = useSelector((state: RootState) => state.user);
   const { isChatOpen } = useSelector((state: RootState) => state.sidebar);
   const dispatch = useDispatch();
+  const stompClient = useStompClient();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -61,6 +64,33 @@ function App() {
       dispatch(loginUser(JSON.parse(storedUser)));
     }
   }, [dispatch]);
+
+  // 채팅 실시간 알림 서비스
+  useEffect(() => {
+    if (!userNo) return;  // 로그인 전이면 구독하지 않음
+
+    const subscribeFn = () => {
+      // 실제 구독
+      const sub = stompClient.subscribe(
+        `/sub/notifications/${userNo}`,
+        frame => {
+          console.log("🔔 notification frame", frame.body);
+          const { message } = JSON.parse(frame.body);
+          toast.info(message);
+        }
+      );
+      // cleanup: 구독 해제
+      return () => sub.unsubscribe();
+    };
+
+    if (stompClient.connected) {
+      // 이미 연결된 경우 바로 구독
+      return subscribeFn();
+    } else {
+      // 아직 연결 안 됐으면 onConnect에서 구독
+      stompClient.onConnect = subscribeFn;
+    }
+  }, [stompClient, userNo]);
 
   return (
     <div>
