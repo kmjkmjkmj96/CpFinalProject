@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const backendHost = "192.168.200.183"; 
 
+
 dayjs.extend(utc);
 
 
@@ -35,7 +36,9 @@ interface ChatMessage {
   receivedDate: string;
   isMine: boolean;
   lastReadChatNo?: number;
+
   unreadCount?: number;
+
 }
 
 interface NotificationData {
@@ -89,49 +92,56 @@ const GroupChat = ({
   }, [chatMessages]);
   
 
+
   // ✅ WebSocket 연결 및 메시지 수신
   useEffect(() => {
-    
     const sock = new SockJS(`http://${backendHost}:8003/workly/ws-stomp`);
-
     const stompClient = new Client({
       webSocketFactory: () => sock,
       reconnectDelay: 5000,
       debug: (str) => console.log("🛠 [WebSocket Debug]:", str),
-      connectHeaders: {
-        userNo: currentUser.userNo.toString(),
-      },
+      connectHeaders: { userNo: currentUser.userNo.toString() },
       onConnect: () => {
         console.log("🟢 WebSocket Connected");
-    
+        
+        // 채팅방 연결이 성공한 후, 온라인 상태 등록 (입장)
+        stompClient.publish({
+          destination: "/pub/chat/enter", // 서버측에서 @MessageMapping("/chat/enter")가 처리
+          body: room.chatRoomNo.toString()
+        });
+
+        // 기존 구독 해제 (있다면)
         if (subscriptionRef.current) {
           stompClient.unsubscribe(subscriptionRef.current);
         }
-    
-        const subscription = stompClient.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-          console.log("📩 새 메시지 수신:", message.body);
-          const newMessage = JSON.parse(message.body);
-          setChatMessages((prev) => [
-            ...prev,
-            { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-          ]);
-        });
-    
-        subscriptionRef.current = subscription.id;
+  
+        // 채팅방 메시지 구독: 해당 채팅방의 메시지 수신
+        const chatSubscription = stompClient.subscribe(
+          `/sub/chatRoom/${room.chatRoomNo}`,
+          (message) => {
+            const newMessage = JSON.parse(message.body);
+            setChatMessages((prev) => [
+              ...prev,
+              {
+                ...newMessage,
+                isMine: newMessage.userNo === currentUser.userNo,
+              },
+            ]);
+          }
+        );
         
-        // 알림용 구독 추가 (개별 사용자 알림)
-        stompClient.subscribe('/user/queue/notifications', (message) => {
+        subscriptionRef.current = chatSubscription.id;
+  
+        // 개별 알림 구독 (채팅방에 있지 않을 때 알림)
+        stompClient.subscribe("/user/queue/notifications", (message) => {
           console.log("알림 수신:", message.body);
           const notification = JSON.parse(message.body);
           showNotification(notification);
         });
-    
         setClient(stompClient);
-    },
-    
+      },
       onDisconnect: () => console.log("🔴 WebSocket Disconnected"),
     });
-    
     stompClient.activate();
 
     return () => {
@@ -143,9 +153,11 @@ const GroupChat = ({
 }, [room.chatRoomNo]);
 
 
+
   // ✅ 날짜 및 시간 변환 함수
   const formatTime = (dateTimeString: string) => {
     if (!dateTimeString) return "";
+
     // “YYYY-MM-DD HH:mm:ss” 형식이 이미 KST라면, 그냥 그대로 포맷
     return dayjs(dateTimeString, "YYYY-MM-DD HH:mm:ss")
       .format("HH:mm");
@@ -160,6 +172,7 @@ function getDateKey(dateString: string): string | null {
   return parsed.format("YYYY-MM-DD");
 }
 
+
   
   
 // 스크롤 하단으로
@@ -172,12 +185,13 @@ useEffect(() => {
   const fetchMessages = async () => {
     try {
       const response = await axios.get(`http://${backendHost}:8003/workly/api/chat/messages/${room.chatRoomNo}`);
-      const profileMap = await fetchOtherProfiles(); // ✅ 나 제외 프로필 정보 가져오기
+      
   
       // ✅ 각 메시지에 프로필 이미지 추가
       const messagesWithProfile = response.data.map((msg: ChatMessage) => ({
         ...msg,
-        profileImg: profileMap[msg.userNo] || profile, // 기본 이미지 설정
+        
+        profileImg: profile, // 기본 프로필만
         isMine: msg.userNo === currentUser.userNo, // ✅ 내 메시지 여부
       }));
 
@@ -201,27 +215,19 @@ useEffect(() => {
     fetchMessages(); 
   }, [room.chatRoomNo]);
 
-  // 나를 제외한 멤버들의 프로필 정보 가져오기
-  const fetchOtherProfiles = async () => {
-    try {
-      const response = await axios.get(`http://${backendHost}:8003/workly/api/chat/membersWithoutMe`, {
-        params: { chatRoomNo: room.chatRoomNo, userNo: currentUser.userNo },
-      });
   
-      console.log("📸 프로필 데이터:", response.data);
-      
-      // userNo를 key로 하는 객체 생성 (예: { 2: 'image_url', 3: 'image_url' })
-      return response.data.reduce((acc: { [key: number]: string }, member: any) => {
-        acc[member.userNo] = member.profileImg || profile;
-        return acc;
-      }, {});
+  useEffect(() => {
+    // 채팅방이 변경될 때 자동으로 읽음 상태 업데이트
+    const updateReadStatus = async () => {
+      try {
+        await axios.put(`http://${backendHost}:8003/workly/api/chat/updateStatus/${room.chatRoomNo}/${currentUser.userNo}`);
+        console.log("✅ [프론트엔드] 채팅방 입장 시 읽음 상태 업데이트 완료");
+      } catch (error) {
+        console.error("❌ [프론트엔드] 읽음 상태 업데이트 실패:", error);
+      }
+    };
   
-    } catch (error) {
-      console.error("❌ 프로필 이미지 가져오기 실패:", error);
-      return {};
-    }
-  };
-  
+
 
 
 // 스크롤 하단으로
@@ -283,6 +289,8 @@ useEffect(() => {
   }, []); // ✅ room.chatRoomNo 의존성 제거
   
   
+
+
 useEffect(() => {
   if (!client || !client.connected) return;
 
@@ -311,6 +319,7 @@ const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (m
         { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
     ]);
 
+
     if (newMessage.userNo !== currentUser.userNo) {
         updateUserChatStatus(newMessage.chatNo);
     }
@@ -321,6 +330,7 @@ const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}
     console.log("📩 안 읽은 메시지 개수 업데이트:", message.body);
     setUnreadCounts(JSON.parse(message.body));
 });
+
 
 subscriptionRef.current = chatSubscription.id;
 
@@ -333,6 +343,7 @@ return () => {
   
 
   
+
 // ✅ 메시지 전송 함수
 const sendMessage = () => {
   if (!client || !client.connected || !inputMessage.trim()) return;
@@ -358,7 +369,10 @@ const sendMessage = () => {
   } catch (error) {
     console.error("❌ [프론트엔드] WebSocket 메시지 전송 실패", error);
   }
+
+
   };
+  
   
 
 // exitChatRoom API 호출 함수
@@ -398,7 +412,7 @@ const handleClose = async () => {
 
 
 
-
+// 마지막 읽은 메세지 번호 업데이트
 const updateUserChatStatus = async () => {
   try {
       await axios.put(`http://${backendHost}:8003/workly/api/chat/updateStatus/${room.chatRoomNo}/${currentUser.userNo}`);
@@ -469,21 +483,46 @@ useEffect(() => {
 
   
 
-  return (
-    <div className="group-chat" style={{ width: 390, height: 600, position: "relative" }}>
-    {/* ToastContainer는 페이지 어딘가에 있어야 함 */}
+ return (
+  <div className="group-chat" style={{ width: 390, height: 600, position: "relative" }}>
     <ToastContainer />
-      <div className="groupchat-background" style={{ width: 390, height: 600, position: "absolute", background: "white", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)"}} />
-        
-       {/* 채팅방 이름 표시 */}
-       <div className="groupchat-title" style={{ left: 20, top: 26, position: "absolute", color: "black", fontSize: 20, fontWeight: "700" }}>
-        {room.roomTitle}
-      </div>
+    <div
+      className="groupchat-background"
+      style={{ width: 390, height: 600, position: "absolute", background: "white", boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)" }}
+    />
 
-      <div className="groupchat-close-icon" style={{ left: 359, top: 22, position: "absolute", cursor: "pointer" }}  onClick={handleClose}>←</div>
+    {/* 채팅방 이름 표시 */}
+    <div
+      className="groupchat-title"
+      style={{ left: 20, top: 26, position: "absolute", color: "black", fontSize: 20, fontWeight: "700" }}
+    >
+      {room.roomTitle}
+    </div>
 
-      <div ref={chatContainerRef} style={{ position: "absolute", top: 75, left: 20, display: "flex", flexDirection: "column", gap: 10, width: 360, overflowY: "auto", height: 380 }}>
+    <div
+      className="groupchat-close-icon"
+      style={{ left: 359, top: 22, position: "absolute", cursor: "pointer" }}
+      onClick={handleClose}
+    >
+      ←
+    </div>
+
+    <div
+      ref={chatContainerRef}
+      style={{
+        position: "absolute",
+        top: 75,
+        left: 20,
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        width: 360,
+        overflowY: "auto",
+        height: 380,
+      }}
+    >
       {chatMessages.map((msg, index) => {
+
     // (2) 시스템 메시지 처리
     if (msg.userName === "SYSTEM") {
       return (
@@ -547,34 +586,66 @@ useEffect(() => {
       >
         {/* 날짜가 바뀌었을 때만 divider + 날짜 */}
         {isNewDay && currentDateKey && (
+
           <div
-            className="dividerDate"
+            key={msg.chatNo ? msg.chatNo : `msg-${index}`}
             style={{
               display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "15px",
-              width: "100%",
+              flexDirection: "column",
+              alignItems: msg.isMine ? "flex-end" : "flex-start",
+              marginBottom: 10,
             }}
           >
+            {isNewDay && currentDateKey && (
+              <div
+                className="dividerDate"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: "15px",
+                  width: "100%",
+                }}
+              >
+                <div
+                  className="left-divider"
+                  style={{ flex: 1, height: "1px", backgroundColor: "#E0E0E0" }}
+                />
+                <div
+                  className="noticechat-date"
+                  style={{
+                    margin: "0 10px",
+                    color: "#4880FF",
+                    fontSize: "11px",
+                    fontFamily: "Roboto",
+                    fontWeight: "500",
+                    lineHeight: "10px",
+                    letterSpacing: "0.5px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {dayjs(msg.receivedDate, "YYYY-MM-DD HH:mm:ss")
+                    .format("YYYY년 MM월 DD일 dddd")}
+
+                </div>
+                <div
+                  className="right-divider"
+                  style={{ flex: 1, height: "1px", backgroundColor: "#E0E0E0" }}
+                />
+              </div>
+            )}
+
+            {/* (5) 수정된 안 읽은 메시지 표시: 메시지 시작 부분에, 내가 보낸 메시지이면 왼쪽, 남의 메시지이면 오른쪽에 표시 */}
+            {(msg.unreadCount ?? 0) > 0 && (
             <div
-              className="left-divider"
-              style={{ flex: 1, height: "1px", background: "#E0E0E0" }}
-            />
-            <div
-              className="noticechat-date"
               style={{
-                margin: "0 10px",
-                color: "#4880FF",
-                fontSize: "11px",
-                fontFamily: "Roboto",
-                fontWeight: "500",
-                lineHeight: "10px",
-                letterSpacing: "0.5px",
-                whiteSpace: "nowrap",
-                width: "auto",
+                fontSize: 10,
+                color: "red",
+                marginTop: 2,
+                alignSelf: msg.isMine ? "flex-start" : "flex-end",
               }}
             >
+
               {/* 원하는 형식으로 날짜 표시 (예: YYYY년 MM월 DD일 dddd) */}
               {dayjs
                 .utc(msg.receivedDate, "YYYY-MM-DD HH:mm:ss")
@@ -595,6 +666,8 @@ useEffect(() => {
               </div>
             )}
 
+
+            {/* (6) 프로필 이미지 표시 (내 메시지가 아닌 경우, 작성자가 바뀌었을 때) */}
             {!msg.isMine && !isSameUserAsBefore && (
               <div style={{ display: "flex", alignItems: "center", marginTop: "3px" }}>
                 <div
@@ -610,7 +683,6 @@ useEffect(() => {
                     marginRight: "8px",
                   }}
                 >
-                  {/* 서버에서 받은 프로필 이미지가 있으면 사용, 없으면 기본 이미지 사용 */}
                   <img
                     style={{ width: "22px", height: "22px", objectFit: "cover" }}
                     src={profile}
@@ -622,6 +694,43 @@ useEffect(() => {
                 </div>
               </div>
             )}
+
+            {/* (7) 메시지 내용 및 시간 */}
+            <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+              {!msg.isMine ? (
+                <div
+                  style={{
+                    background: "#E9EBF1",
+                    wordBreak: "break-word",
+                    padding: "11px",
+                    borderRadius: "7px",
+                    fontSize: "12px",
+                    color: "black",
+                    maxWidth: "230px",
+                    marginLeft: "50px",
+                    marginBottom: "-5px",
+                  }}
+                >
+                  {msg.message}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    background: "#D2E3FF",
+                    padding: "11px",
+                    borderRadius: "7px",
+                    fontSize: "12px",
+                    color: "black",
+                    maxWidth: "230px",
+                    wordBreak: "break-word",
+                    marginRight: "5px",
+                    marginBottom: "-5px",
+                    marginTop: "2px",
+                  }}
+                >
+                  {msg.message}
+                </div>
+              )}
 
 
               <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
@@ -679,73 +788,94 @@ useEffect(() => {
                   </div>
                 )}
               </div>
+
             </div>
-          );
-        })}
-      </div>
-      
-      
 
-      <img className="bell" 
-      //onClick={handleBellClick} 
-      style={{ cursor: "pointer", width: 30, height: 30, left: 23, top: 545, position: "absolute" }} src={bell} alt="icon" />
-        <img
-        className="personplus"
-        onClick={() => {
-          console.log("personplus 클릭: 부모 상태 업데이트 호출");
-          // 부모에서 전달받은 setIsAddMemberPanelOpen 함수 호출
-          setIsAddMemberPanelOpen(true);
-        }}
-        style={{
-          width: 30,
-          height: 30,
-          left: 69,
-          top: 545,
-          position: "absolute",
-          cursor: "pointer",
-        }}
-        src={personplus}
-        alt="icon"
-      />
-
-          <img
-            className="exit"
-            onClick={handleExit}
-            style={{ width: 30, height: 30, left: 116, top: 545, position: "absolute", cursor: "pointer" }}
-            src={exit}
-            alt="icon"
-          />
-
-          <textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyDown={(e) => {
-              // Shift+Enter는 줄바꿈 허용, 단순 Enter면 전송
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            placeholder="메세지 입력"
-            maxLength={5000}
-            style={{
-              position: "absolute",
-              bottom: 70,
-              left: "20px",
-              width: "350px",
-              height: "60px",
-              borderRadius: "5px",
-              border: "1.5px solid #ccc",
-              padding: "10px",
-              fontSize: "14px",
-              resize: "none",
-              overflowY: "auto",
-            }}
-          />
-      <div onClick={sendMessage} style={{ position: "absolute", bottom: 23, left: 300, width: "70px", height: "35px", background: "#4880FF", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "14px", borderRadius: "5px", cursor: "pointer" }}>전송</div>
-      
+            
+          </div>
+        );
+      })}
     </div>
-  );
+
+    <img
+      className="bell"
+      //onClick={handleBellClick}
+      style={{ cursor: "pointer", width: 30, height: 30, left: 23, top: 545, position: "absolute" }}
+      src={bell}
+      alt="icon"
+    />
+    <img
+      className="personplus"
+      onClick={() => {
+        console.log("personplus 클릭: 부모 상태 업데이트 호출");
+        setIsAddMemberPanelOpen(true);
+      }}
+      style={{
+        width: 30,
+        height: 30,
+        left: 69,
+        top: 545,
+        position: "absolute",
+        cursor: "pointer",
+      }}
+      src={personplus}
+      alt="icon"
+    />
+    <img
+      className="exit"
+      onClick={handleExit}
+      style={{ width: 30, height: 30, left: 116, top: 545, position: "absolute", cursor: "pointer" }}
+      src={exit}
+      alt="icon"
+    />
+    <textarea
+      value={inputMessage}
+      onChange={(e) => setInputMessage(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      }}
+      placeholder="메세지 입력"
+      maxLength={5000}
+      style={{
+        position: "absolute",
+        bottom: 70,
+        left: "20px",
+        width: "350px",
+        height: "60px",
+        borderRadius: "5px",
+        border: "1.5px solid #ccc",
+        padding: "10px",
+        fontSize: "14px",
+        resize: "none",
+        overflowY: "auto",
+      }}
+    />
+    <div
+      onClick={sendMessage}
+      style={{
+        position: "absolute",
+        bottom: 23,
+        left: 300,
+        width: "70px",
+        height: "35px",
+        background: "#4880FF",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "white",
+        fontSize: "14px",
+        borderRadius: "5px",
+        cursor: "pointer",
+      }}
+    >
+      전송
+    </div>
+  </div>
+);
+
 };
 
 export default GroupChat;  

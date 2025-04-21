@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.workly.final_project.chat.model.dto.ChatStatusUpdateDTO;
 import com.workly.final_project.chat.model.dto.FavoriteDTO;
 import com.workly.final_project.chat.model.service.ChatService;
+import com.workly.final_project.chat.model.vo.Chat;
 import com.workly.final_project.chat.model.vo.ChatRoom;
 import com.workly.final_project.chat.model.vo.UserChat;
 import com.workly.final_project.member.model.dto.MemberDeptPositionDTO;
@@ -148,44 +149,7 @@ public class ChatController {
 		    return ResponseEntity.ok(departments);
 		}
  
-		// userChat 마지막으로 읽은 번호 업데이트 
-		@PutMapping("/updateStatus/{chatRoomNo}/{userNo}")
-		public ResponseEntity<?> updateUserChatStatus(@PathVariable int chatRoomNo, @PathVariable int userNo) {
-		    try {
-		        chatService.updateUserChat(new UserChat(userNo, chatRoomNo, chatService.getLastChatNo(chatRoomNo)));
-		        return ResponseEntity.ok().body("User chat status updated successfully");
-		    } catch (Exception e) {
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user chat status");
-		    }
-		}
 		
-		// 다른 채팅방으로 이동시
-		@PostMapping("/leave/{chatRoomNo}/{userNo}")
-		public ResponseEntity<?> leaveChatRoom(@PathVariable int chatRoomNo, @PathVariable int userNo) {
-		    log.info("🚪 [API] 채팅방 이동 요청 - userNo: {}, chatRoomNo: {}", userNo, chatRoomNo);
-		    chatService.leaveChatRoom(userNo, chatRoomNo);
-		    return ResponseEntity.ok().build();
-		}
-		
-		// 새로운 API (lastReadChatNo가 포함된 경우)
-		@PutMapping("/updateStatusWithRead/{chatRoomNo}/{userNo}/{lastReadChatNo}")
-		public ResponseEntity<Void> updateUserChatStatusWithRead(
-		    @PathVariable int chatRoomNo, 
-		    @PathVariable int userNo, 
-		    @PathVariable int lastReadChatNo
-		) {
-		    chatService.updateUserChatStatus(userNo, chatRoomNo, lastReadChatNo);
-		    return ResponseEntity.ok().build();
-		}
-
-		// 안읽은 채팅 수 계산
-		@GetMapping("/chat/unreadUsers/{chatRoomNo}/{lastReadChatNo}")
-		public List<Integer> getUnreadUsers(
-		    @PathVariable int chatRoomNo, 
-		    @PathVariable int lastReadChatNo
-		) {
-		    return chatService.getUnreadUserList(chatRoomNo, lastReadChatNo);
-		}
 		
 		// 채팅방 멤버 추가하기
 		@PostMapping("/addMembers")
@@ -249,8 +213,78 @@ public class ChatController {
 		 }
 
 
+		 //채팅 메세지 목록 조회
+		    @GetMapping("/api/chat/messages/{chatRoomNo}")
+		    public ResponseEntity<?> getChatMessages(@PathVariable int chatRoomNo) {
+		        List<Chat> messages = chatService.getChatMessages(chatRoomNo);
+		        if (messages == null || messages.isEmpty()) {
+		            return ResponseEntity.ok(List.of()); 
+		        }
+		        return ResponseEntity.ok(messages);
+		    }
+		    
+		    // 마지막으로 읽은 번호 가지고 오기
+		    @GetMapping("/api/chat/lastRead/{chatRoomNo}/{userNo}")
+		    public ResponseEntity<Integer> getLastReadChatNo(
+		            @PathVariable int chatRoomNo,
+		            @PathVariable int userNo) {
+		        try {
+		            int lastReadChatNo = chatService.getLastReadChatNo(userNo, chatRoomNo);
+		            return ResponseEntity.ok(lastReadChatNo);
+		        } catch (Exception e) {
+		            log.error(":x: lastReadChatNo 조회 실패", e);
+		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(-1);
+		        }
+		    }
+		    @PostMapping("/api/chat/saveMessage")
+		    public ResponseEntity<?> saveChatMessage(@RequestBody Chat chat) {
+		        try {
+		            chatService.saveChatMessage(chat);
+		            return ResponseEntity.ok(chat);
+		        } catch (Exception e) {
+		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 저장 실패");
+		        }
+		    }
+		    
+		 // userChat 마지막으로 읽은 번호 업데이트 
+		    @PutMapping("/updateStatus/{chatRoomNo}/{userNo}")
+		    public ResponseEntity<?> updateUserChatStatus(@PathVariable int chatRoomNo, @PathVariable int userNo) {
+		        try {
+		            // DB의 USER_CHAT 업데이트
+		            int lastChatNo = chatService.getLastChatNo(chatRoomNo);
+		            chatService.updateUserChat(new UserChat(userNo, chatRoomNo, lastChatNo));
+		            
+		            // 최신 unreadCount 재계산
+		            List<Integer> unreadUserNos = chatService.getUnreadUserList(chatRoomNo, lastChatNo);
+		            int unreadCount = unreadUserNos.size();
+		            
+		            // unreadCount 업데이트를 구독하고 있는 클라이언트로 브로드캐스트
+		            messagingTemplate.convertAndSend("/sub/chat/unread/" + chatRoomNo, unreadCount);
+		            
+		            return ResponseEntity.ok().body("User chat status updated successfully");
+		        } catch (Exception e) {
+		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user chat status");
+		        }
+		    }
 
+			
+			// 다른 채팅방으로 이동시
+			@PostMapping("/leave/{chatRoomNo}/{userNo}")
+			public ResponseEntity<?> leaveChatRoom(@PathVariable int chatRoomNo, @PathVariable int userNo) {
+			    log.info("🚪 [API] 채팅방 이동 요청 - userNo: {}, chatRoomNo: {}", userNo, chatRoomNo);
+			    chatService.leaveChatRoom(userNo, chatRoomNo);
+			    return ResponseEntity.ok().build();
+			}
+			
 
+			// 안읽은 채팅 수 계산
+			@GetMapping("/chat/unreadUsers/{chatRoomNo}/{lastReadChatNo}")
+			public List<Integer> getUnreadUsers(
+			    @PathVariable int chatRoomNo, 
+			    @PathVariable int lastReadChatNo
+			) {
+			    return chatService.getUnreadUserList(chatRoomNo, lastReadChatNo);
+			}
 
 
 

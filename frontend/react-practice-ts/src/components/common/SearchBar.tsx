@@ -3,6 +3,7 @@ import search from '../../assets/images/icon/search.png';
 import { useEffect, useState } from 'react';
 import axios from '../../utils/CustomAxios';
 
+
 const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handleSearch, setCurrentPage }) => {
     const [dept, setDept] = useState([]);
     const [position, setPosition] = useState([]);
