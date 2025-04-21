@@ -1,5 +1,4 @@
 package com.workly.final_project.chat.controller;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.workly.final_project.chat.model.dao.ChatDao;
 import com.workly.final_project.chat.model.dto.ChatStatusUpdateDTO;
 import com.workly.final_project.chat.model.service.ChatPresenceService;
 import com.workly.final_project.chat.model.service.ChatService;
@@ -29,33 +29,50 @@ import lombok.extern.slf4j.Slf4j;
 public class StompController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatPresenceService chatPresenceService;
-    
+
+    private final ChatDao chatDao;
     // 채팅 메세지 저장 및 전송 + 알림
     @MessageMapping("/chat/sendMessage/{chatRoomNo}")
     public void sendMessage(@DestinationVariable int chatRoomNo, @Payload Chat chat) {
-        log.info("[WebSocket] 메시지 수신: roomNo={}, message={}", chatRoomNo, chat);
+        log.info(":말풍선: [WebSocket] 메시지 수신: roomNo={}, message={}", chatRoomNo, chat);
+        
+
+
         try {
+            // 1. DB 저장
             chatService.saveChatMessage(chat);
             log.info("[DB 저장 완료] 저장된 메시지: {}", chat);
         } catch (Exception e) {
-            log.error("[DB 저장 실패]", e);
+
+            log.error(":x: [DB 저장 실패]", e);
+            return; // 에러 났으면 뒤에 진행하지 않도록 중단
         }
-        
-        // unreadUserNos를 구한 후, 그 크기를 Chat 객체에 넣습니다.
-        List<Integer> unreadUserNos = chatService.getUnreadUserList(chatRoomNo, chat.getChatNo());
-        chat.setUnreadCount(unreadUserNos.size());  // 여기서 추가
-        
-        // 기존 채팅 메시지 전송 (실시간 반영) -> 이제 unreadCount가 포함됩니다.
+
+        // 2. 기본 메시지 브로드캐스트
         messagingTemplate.convertAndSend("/sub/chatRoom/" + chatRoomNo, chat);
-        
-        // 아래 알림 전송 부분은 그대로 둡니다.
+
+        // 3. unreadCount push: 메시지 전송 직후에도 각 메시지별 unread 정보 push
+        List<Integer> affectedChatNos = chatService.getChatNosToUpdate(chatRoomNo, chat.getChatNo());
+        for (Integer chatNo : affectedChatNos) {
+            int unreadCount = chatService.getUnreadCount(chatRoomNo, chatNo);
+
+            Map<String, Object> update = new HashMap<>();
+            update.put("type", "UNREAD_UPDATE");
+            update.put("chatNo", chatNo);
+            update.put("unreadCount", unreadCount);
+
+            messagingTemplate.convertAndSend("/sub/chatRoom/" + chatRoomNo, update);
+        }
+
+        // 4. 알림 (optional)
+        List<Integer> unreadUserNos = chatService.getUnreadUserList(chatRoomNo, chat.getChatNo());
         log.info("알림 전송 대상: " + unreadUserNos);
         for (Integer userNo : unreadUserNos) {
             Map<String, String> notif = new HashMap<>();
             notif.put("message", "새 메시지가 도착했습니다 in room " + chatRoomNo);
-            messagingTemplate.convertAndSendToUser(String.valueOf(userNo), "/queue/notifications", notif);
-            log.info("알림 전송: " + userNo);
+            // /sub/notifications/{userNo} 로 보냄 → 사용자 세션 매핑 무관
+            messagingTemplate.convertAndSend("/sub/notifications/" + userNo, notif);
+            log.info("알림 전송 to /sub/notifications/{}: {}", userNo, notif);
         }
     }
 
@@ -117,10 +134,53 @@ public class StompController {
         return ResponseEntity.ok(messages);
     }
 
-  
+    // 채팅방 나가기(진짜로 나가는거 x)
+    @PostMapping("/api/chat/leave") // 관련 주소 exit에서 leave로 변경
+    public ResponseEntity<String> exitChatRoom(@RequestBody UserChat userChat) {
+        try {
+            int userNo = userChat.getUserNo();
+            int chatRoomNo = userChat.getChatRoomNo();
+            // :흰색_확인_표시: 마지막으로 본 메시지 번호 가져오기
+            int lastReadChatNo = chatService.getLastChatNo(chatRoomNo);
+            userChat.setLastReadChatNo(lastReadChatNo);
+            // :흰색_확인_표시: USER_CHAT 업데이트
+            chatService.updateUserChat(userChat);
+            log.info(":작은_파란색_다이아몬드: [Chat Exit] USER_CHAT 업데이트 (lastReadChatNo: {})", lastReadChatNo);
+            return ResponseEntity.ok("채팅방 나가기 성공");
+        } catch (Exception e) {
+            log.error(":x: 채팅방 나가기 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("채팅방 나가기 실패");
+        }
+    }
+    @MessageMapping("/chat/enter")
+    public void handleChatEnter(@Payload UserChat userChat) {
+        log.info(" 채팅방 입장 처리: {}", userChat);
 
-    
- // 마지막으로 읽은 번호 조회 (REST API)
+        // 1. 유저의 마지막 읽은 메시지 chatNo 업데이트
+        chatService.updateUserChatStatus(
+            userChat.getUserNo(), userChat.getChatRoomNo(), userChat.getLastReadChatNo()
+        );
+
+        // 2. 해당 chatNo 이하 메시지 전체 가져오기 (read 반영 후 기준)
+        List<Integer> affectedChatNos = chatDao.getChatNosToUpdate(
+            userChat.getChatRoomNo(), userChat.getLastReadChatNo()
+        );
+
+        // 3. 각 메시지에 대해 unread 수 계산 후 push
+        for (Integer chatNo : affectedChatNos) {
+            int unreadCount = chatService.getUnreadCount(userChat.getChatRoomNo(), chatNo);
+
+            Map<String, Object> update = new HashMap<>();
+            update.put("type", "UNREAD_UPDATE");
+            update.put("chatNo", chatNo);
+            update.put("unreadCount", unreadCount);
+
+            messagingTemplate.convertAndSend("/sub/chatRoom/" + userChat.getChatRoomNo(), update);
+        }
+    }
+
+
+    // 마지막으로 읽은 번호 가지고 오기
     @GetMapping("/api/chat/lastRead/{chatRoomNo}/{userNo}")
     public ResponseEntity<Integer> getLastReadChatNo(
             @PathVariable int chatRoomNo,
@@ -143,30 +203,30 @@ public class StompController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 저장 실패");
         }
     }
+    
+    
+    @MessageMapping("/chat/read")
+    public void handleChatRead(@Payload UserChat userChat) {
+        log.info("읽음 처리 요청: {}", userChat);
 
-    // STOMP 엔드포인트: 채팅방 입장 시 온라인 상태 등록
-    @MessageMapping("/chat/enter")
-    public void enterChatRoom(@Payload int chatRoomNo, Principal principal) {
-        int userNo = Integer.parseInt(principal.getName());
-        chatPresenceService.addUser(chatRoomNo, userNo);
-        log.info("[STOMP] User {} entered chatRoom {}", userNo, chatRoomNo);
-        
-        // 사용자가 입장했으므로 해당 사용자의 USER_CHAT 업데이트를 수행
-        chatService.enterChatRoom(userNo, chatRoomNo);
-        
-        // 입장 후 최신 unreadCount 재계산 및 브로드캐스트
-        int lastChatNo = chatService.getLastChatNo(chatRoomNo);
-        List<Integer> unreadUserNos = chatService.getUnreadUserList(chatRoomNo, lastChatNo);
-        int unreadCount = unreadUserNos.size();
-        messagingTemplate.convertAndSend("/sub/chat/unread/" + chatRoomNo, unreadCount);
+        // 1. DB에 읽음 상태 업데이트
+        chatService.updateUserChatStatus(userChat.getUserNo(), userChat.getChatRoomNo(), userChat.getLastReadChatNo());
+
+        // 2. lastReadChatNo 이하의 메시지들 조회
+        List<Integer> affectedChatNos = chatService.getChatNosToUpdate(userChat.getChatRoomNo(), userChat.getLastReadChatNo());
+
+        // 3. 각 메시지에 대해 unreadCount 재계산 후 broadcast
+        for (Integer chatNo : affectedChatNos) {
+            int unreadCount = chatService.getUnreadCount(userChat.getChatRoomNo(), chatNo);
+
+            Map<String, Object> updateMessage = new HashMap<>();
+            updateMessage.put("type", "UNREAD_UPDATE");
+            updateMessage.put("chatNo", chatNo);
+            updateMessage.put("unreadCount", unreadCount);
+
+            messagingTemplate.convertAndSend("/sub/chatRoom/" + userChat.getChatRoomNo(), updateMessage);
+        }
     }
 
     
-    // STOMP 엔드포인트: 채팅방에서 단순히 온라인 상태 제거 (실제 탈퇴와는 구분)
-    @MessageMapping("/chat/presenceExit")
-    public void presenceExitChatRoom(@Payload int chatRoomNo, Principal principal) {
-        int userNo = Integer.parseInt(principal.getName());
-        chatPresenceService.removeUser(chatRoomNo, userNo);
-        log.info("[STOMP] User {} left presence in chatRoom {}", userNo, chatRoomNo);
-    }
 }

@@ -16,6 +16,7 @@ public class Chat {
 	private int chatNo;
 	private int chatRoomNo;
 	private String message;
+	private int unreadCount; // 필수로 입력
 	private String receivedDate;
 	private int userNo;
 	private String userName;

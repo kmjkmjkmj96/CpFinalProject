@@ -9,7 +9,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
 import { setFavorites } from "../../features/chatSlice";
 import { Member } from "../../type/chatType";
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 
@@ -229,7 +228,7 @@ const ChatMain: React.FC<ChatMainProps> = ({
       },
     });
   
-    stompClient.onConnect = (frame) => {
+    stompClient.onConnect = () => {
       // "/sub/status" 채널 구독
       stompClient.subscribe("/sub/status", (message) => { // Update 붙여놓기
         const statusUpdate = JSON.parse(message.body);

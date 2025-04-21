@@ -146,6 +146,16 @@ public class ChatDao {
 	    return sqlSession.selectOne("chat.countDefaultChatRoom");
 	}
 
+	// 실시간 채팅 안읽음 갯수 업데이트
+	public List<Integer> getChatNosToUpdate(int chatRoomNo, int lastReadChatNo) {
+		 return sqlSession.selectList("chat.getChatNosToUpdate", Map.of("chatRoomNo", chatRoomNo, "lastReadChatNo", lastReadChatNo));
+	
+	}
+
+	public int getUnreadCount(int chatRoomNo, int chatNo) {
+		return sqlSession.selectOne("chat.getUnreadCount", Map.of("chatRoomNo", chatRoomNo, "chatNo", chatNo));
+	}
+
 
     	
 

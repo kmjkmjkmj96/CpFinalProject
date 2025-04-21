@@ -14,8 +14,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const backendHost = "192.168.200.125"; 
 
+
+const backendHost = "192.168.200.183"; 
 
 
 dayjs.extend(utc);
@@ -35,7 +36,9 @@ interface ChatMessage {
   receivedDate: string;
   isMine: boolean;
   lastReadChatNo?: number;
-  unreadCount?:number;
+
+  unreadCount?: number;
+
 }
 
 interface NotificationData {
@@ -57,7 +60,6 @@ const GroupChat = ({
   room,
   currentUser,
   onClose,
-  messages = [],
   setIsAddMemberPanelOpen
 }: GroupChatProps) => {
   const [client, setClient] = useState<Client | null>(null);
@@ -66,7 +68,9 @@ const GroupChat = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [lastReadChatNo, setLastReadChatNo] = useState<number | null>(null);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [unreadCounts, setUnreadCounts] = useState<{ [chatNo: number]: number }>({});
+  
+
   
 
   const showNotification = (notification : NotificationData) => {
@@ -139,31 +143,35 @@ const GroupChat = ({
       onDisconnect: () => console.log("🔴 WebSocket Disconnected"),
     });
     stompClient.activate();
-  
+
     return () => {
-      if (subscriptionRef.current) {
-        stompClient.unsubscribe(subscriptionRef.current);
-      }
-      stompClient.deactivate();
+        if (subscriptionRef.current) {
+            stompClient.unsubscribe(subscriptionRef.current);
+        }
+        stompClient.deactivate();
     };
-  }, [room.chatRoomNo, currentUser.userNo]);
-  
+}, [room.chatRoomNo]);
+
+
 
   // ✅ 날짜 및 시간 변환 함수
-  
   const formatTime = (dateTimeString: string) => {
     if (!dateTimeString) return "";
-    // UTC로 해석하지 않고, 지정한 포맷으로 바로 파싱합니다.
-    return dayjs(dateTimeString, "YYYY-MM-DD HH:mm:ss").format("HH:mm");
+
+    // “YYYY-MM-DD HH:mm:ss” 형식이 이미 KST라면, 그냥 그대로 포맷
+    return dayjs(dateTimeString, "YYYY-MM-DD HH:mm:ss")
+      .format("HH:mm");
   };
-  
-  function getDateKey(dateString: string): string | null {
-    if (!dateString) return null;
-    const parsed = dayjs(dateString, "YYYY-MM-DD HH:mm:ss");
-    if (!parsed.isValid()) return null;
-    return parsed.format("YYYY-MM-DD");
-  }
-  
+
+ // 날짜만 비교하기 위한 헬퍼 함수 (중복 제거)
+function getDateKey(dateString: string): string | null {
+  if (!dateString) return null;
+  const parsed = dayjs(dateString, "YYYY-MM-DD HH:mm:ss");
+
+  if (!parsed.isValid()) return null;
+  return parsed.format("YYYY-MM-DD");
+}
+
 
   
   
@@ -186,6 +194,15 @@ useEffect(() => {
         profileImg: profile, // 기본 프로필만
         isMine: msg.userNo === currentUser.userNo, // ✅ 내 메시지 여부
       }));
+
+      // 여기서 unreadCounts 초기값도 세팅
+      const initialUnreadCounts: { [chatNo: number]: number } = {};
+      response.data.forEach((msg: ChatMessage) => {
+        if (typeof msg.unreadCount === "number") {
+          initialUnreadCounts[msg.chatNo] = msg.unreadCount;
+        }
+      });
+      setUnreadCounts(initialUnreadCounts);
   
       setChatMessages(messagesWithProfile);
     } catch (error) {
@@ -210,9 +227,7 @@ useEffect(() => {
       }
     };
   
-    updateReadStatus();
-  }, [room.chatRoomNo, currentUser.userNo]);
-  
+
 
 
 // 스크롤 하단으로
@@ -225,7 +240,7 @@ useEffect(() => {
 const fetchUnreadMessages = async () => {
   try {
       const response = await axios.get(`http://${backendHost}:8003/workly/api/chat/unread/${room.chatRoomNo}/${currentUser.userNo}`);
-      setUnreadCount(response.data);
+      setUnreadCounts(response.data);
   } catch (error) {
       console.error("❌ [프론트엔드] 안 읽은 메시지 개수 불러오기 실패", error);
   }
@@ -274,54 +289,8 @@ useEffect(() => {
   }, []); // ✅ room.chatRoomNo 의존성 제거
   
   
-  
 
 
-  
-// 스크롤 하단으로
-useEffect(() => {
-  if (chatContainerRef.current) {
-    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-  }
-}, [chatMessages]);
-  // 채팅방을 구독하는 모두에게 전송?
-  const subscribeToChatRoom = () => {
-    if (!client || !client.connected) return;
-
-    // 채팅방 메시지 수신 구독 콜백 부분
-    // 기존 subscribeToChatRoom 콜백 내
-      client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-        const newMessage = JSON.parse(message.body);
-        setChatMessages((prev) => [
-            ...prev,
-            { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-        ]);
-
-        // 만약 수신된 메시지가 내가 보낸 메시지가 아니라면, 읽음 상태 업데이트를 호출
-        if (newMessage.userNo !== currentUser.userNo) {
-            updateUserChatStatus();
-        }
-
-        // 최신 unread 메시지 다시 불러오기
-        fetchUnreadMessages();
-      }, { userNo: currentUser.userNo.toString(), roomId: room.chatRoomNo.toString() });
-
-    };
-
-    // 새로 추가(presence)
-    useEffect(() => {
-      return () => {
-        if (client && client.connected) {
-          client.publish({
-            destination: "/pub/chat/presenceExit", // 서버의 존재 제거 엔드포인트
-            body: room.chatRoomNo.toString(),
-          });
-          console.log("STOMP: Presence exit published for room", room.chatRoomNo);
-        }
-      };
-    }, [client, room.chatRoomNo]);
-    
-  
 useEffect(() => {
   if (!client || !client.connected) return;
 
@@ -330,68 +299,78 @@ useEffect(() => {
       client.unsubscribe(subscriptionRef.current);
   }
 
-  // 채팅 메시지 구독
-  const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
-      console.log("📩 새 메시지 수신:", message.body);
-      const newMessage = JSON.parse(message.body);
+// 채팅 메시지 구독
+const chatSubscription = client.subscribe(`/sub/chatRoom/${room.chatRoomNo}`, (message) => {
+    console.log("📩 새 메시지 수신:", message.body);
+    const newMessage = JSON.parse(message.body);
 
-      setChatMessages((prev) => [
-          ...prev,
-          { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
-      ]);
+    // ✅ UNREAD_UPDATE는 메시지 아님 → 무시하거나 별도로 처리
+    if (newMessage.type === "UNREAD_UPDATE") {
+      setUnreadCounts(prev => ({
+        ...prev,
+        [newMessage.chatNo]: newMessage.unreadCount
+      }));
+      return;
+    }
+    
 
-      if (newMessage.userNo !== currentUser.userNo) {
-          updateUserChatStatus(newMessage.chatNo);
-      }
-  });
+    setChatMessages((prev) => [
+        ...prev,
+        { ...newMessage, isMine: newMessage.userNo === currentUser.userNo },
+    ]);
 
-  // 안 읽은 메시지 개수 업데이트 구독
-  // unreadSubscription: 클라이언트 측에서 unreadCount 업데이트 구독
-  const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}`, (message) => {
+
+    if (newMessage.userNo !== currentUser.userNo) {
+        updateUserChatStatus(newMessage.chatNo);
+    }
+});
+
+// 안 읽은 메시지 개수 업데이트 구독
+const unreadSubscription = client.subscribe(`/sub/chat/unread/${room.chatRoomNo}`, (message) => {
     console.log("📩 안 읽은 메시지 개수 업데이트:", message.body);
-    setUnreadCount(JSON.parse(message.body));
-  });
+    setUnreadCounts(JSON.parse(message.body));
+});
 
 
-  subscriptionRef.current = chatSubscription.id;
+subscriptionRef.current = chatSubscription.id;
 
-  return () => {
-      chatSubscription.unsubscribe();
-      unreadSubscription.unsubscribe();
-  };
+return () => {
+    chatSubscription.unsubscribe();
+    unreadSubscription.unsubscribe();
+};
 }, [room.chatRoomNo, client]);
 
   
-  
 
   
-  // ✅ 메시지 전송 함수
-  const sendMessage = () => {
-    if (!client || !client.connected || !inputMessage.trim()) return;
-  
-    const chatMessage = {
-      chatRoomNo: room.chatRoomNo,
-      userNo: currentUser.userNo,
-      userName: currentUser.userName,
-      message: inputMessage,
-      receivedDate: dayjs().format("YYYY-MM-DD HH:mm:ss")
 
-    };
-  
-    console.log("📤 [프론트엔드] WebSocket으로 메시지 전송:", chatMessage);
-    try {
-      client.publish({
-        destination: `/pub/chat/sendMessage/${room.chatRoomNo}`,
-        body: JSON.stringify(chatMessage),
-      });
-      console.log("✅ [프론트엔드] WebSocket 메시지 전송 성공");
-      setInputMessage("");
-      
-      // 보내는 사람은 자신의 메시지는 바로 읽은 상태로 처리해야 함 → REST API 호출
-      updateUserChatStatus();  
-    } catch (error) {
-      console.error("❌ [프론트엔드] WebSocket 메시지 전송 실패", error);
-    }
+// ✅ 메시지 전송 함수
+const sendMessage = () => {
+  if (!client || !client.connected || !inputMessage.trim()) return;
+
+  // 현재 한국 로컬시간을 UTC로 변환한 후 "YYYY-MM-DD HH:mm:ss"로 포맷
+  const chatMessage = {
+    chatRoomNo: room.chatRoomNo,
+    userNo: currentUser.userNo,
+    userName: currentUser.userName,
+    message: inputMessage,
+    receivedDate: dayjs().format("YYYY-MM-DD HH:mm:ss")
+  };
+
+  console.log("📤 [프론트엔드] WebSocket으로 메시지 전송:", chatMessage);
+  try {
+    client.publish({
+      destination: `/pub/chat/sendMessage/${room.chatRoomNo}`,
+      body: JSON.stringify(chatMessage),
+    });
+    console.log("✅ [프론트엔드] WebSocket 메시지 전송 성공");
+    setInputMessage("");
+    updateUserChatStatus();
+  } catch (error) {
+    console.error("❌ [프론트엔드] WebSocket 메시지 전송 실패", error);
+  }
+
+
   };
   
   
@@ -448,10 +427,59 @@ useEffect(() => {
     updateUserChatStatus();
 }, [room.chatRoomNo, currentUser.userNo]);  // ✅ 채팅방이 변경될 때마다 실행
 
+useEffect(() => {
+  const savedCounts = localStorage.getItem(`unreadCounts_${room.chatRoomNo}`);
+  if (savedCounts) {
+    setUnreadCounts(JSON.parse(savedCounts));
+  }
+}, [room.chatRoomNo]);
 
-const isUnread = (msg: ChatMessage) => {
-  return lastReadChatNo !== null && msg.chatNo > lastReadChatNo;
-};
+useEffect(() => {
+  localStorage.setItem(`unreadCounts_${room.chatRoomNo}`, JSON.stringify(unreadCounts));
+}, [unreadCounts, room.chatRoomNo]);
+
+
+// 실시간 채팅 상대방 안읽음 메세지 수 처리
+// ✅ 새 메시지가 추가될 때마다, 안 읽은 메시지를 읽음 처리 
+useEffect(() => {
+  if (!client || !client.connected || chatMessages.length === 0) return;
+
+  const unreadMessages = chatMessages.filter(
+    (msg) =>
+      msg.chatNo > (lastReadChatNo || 0) &&
+      msg.userNo !== currentUser.userNo
+  );
+
+  if (unreadMessages.length === 0) return;
+
+  const latestUnread = unreadMessages[unreadMessages.length - 1];
+
+  if (lastReadChatNo && latestUnread.chatNo <= lastReadChatNo) return;
+
+  const payload = {
+    chatRoomNo: room.chatRoomNo,
+    userNo: currentUser.userNo,
+    lastReadChatNo: latestUnread.chatNo,
+  };
+
+  // ✅ read와 enter를 동시에 보내도 되지만 순서 주의
+  client.publish({
+    destination: "/pub/chat/read",
+    body: JSON.stringify(payload),
+  });
+
+  // ✅ enter는 read 이후에
+  setTimeout(() => {
+    client.publish({
+      destination: "/pub/chat/enter",
+      body: JSON.stringify(payload),
+    });
+  }, 100); // 약간의 delay를 두면 더 안정적
+
+  setLastReadChatNo(latestUnread.chatNo);
+}, [chatMessages, client]);
+
+
 
   
 
@@ -494,55 +522,71 @@ const isUnread = (msg: ChatMessage) => {
       }}
     >
       {chatMessages.map((msg, index) => {
-        // (1) 시스템 메시지 처리
-        if (msg.userName === "SYSTEM") {
-          return (
-            <div
-              key={msg.chatNo ? msg.chatNo : `sys-${index}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "10px 0",
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  backgroundColor: "#D3D3D3",
-                  marginRight: "10px",
-                }}
-              />
-              <span style={{ color: "#999", fontSize: "12px" }}>{msg.message}</span>
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  backgroundColor: "#D3D3D3",
-                  marginLeft: "10px",
-                }}
-              />
-            </div>
-          );
-        }
 
-        // (2) 날짜 구분(날짜가 바뀌었을 때 divider + 날짜 표시)
-        const prevMsg = chatMessages[index - 1];
-        const currentDateKey = getDateKey(msg.receivedDate);
-        const prevDateKey = prevMsg ? getDateKey(prevMsg.receivedDate) : null;
-        const isNewDay = !prevMsg || (prevDateKey !== currentDateKey && currentDateKey);
+    // (2) 시스템 메시지 처리
+    if (msg.userName === "SYSTEM") {
+      return (
+        <div
+        key={`sys-${index}`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "10px 0",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              height: "1px",
+              backgroundColor: "#D3D3D3",
+              marginRight: "10px",
+            }}
+          />
+          <span style={{ color: "#999", fontSize: "12px" }}>{msg.message}</span>
+          <div
+            style={{
+              flex: 1,
+              height: "1px",
+              backgroundColor: "#D3D3D3",
+              marginLeft: "10px",
+            }}
+          />
+        </div>
+      );
+    }
 
-        // (3) 이전 메시지와 같은 작성자인지 여부 (프로필 표시 여부)
-        const isSameUserAsBefore = prevMsg && prevMsg.userNo === msg.userNo;
-        // unread 여부 (isUnread 함수는 lastReadChatNo !== null && msg.chatNo > lastReadChatNo)
-        const unread = isUnread(msg);
+    // 이전 메시지 / 현재 메시지
+    const prevMsg = chatMessages[index - 1];
+    // 날짜 키(YYYY-MM-DD)만 뽑아서 비교
+    const prevDateKey = prevMsg ? getDateKey(prevMsg.receivedDate) : null;
+    const currentDateKey = getDateKey(msg.receivedDate);
 
-        // (4) 다음 메시지와 시간 비교하여 시간 표시 여부
-        const nextMsg = chatMessages[index + 1];
-        const showTime = !nextMsg || formatTime(nextMsg.receivedDate) !== formatTime(msg.receivedDate);
+    // 이전 메시지가 없거나, 날짜 키가 달라졌으면 새로운 날
+    const isNewDay = !prevMsg || (prevDateKey !== currentDateKey && currentDateKey);
 
-        return (
+    const nextMsg = chatMessages[index + 1];
+    const isSameUserAsBefore = prevMsg && prevMsg.userNo === msg.userNo;
+    
+
+    // 시간을 표시할지 여부 (다음 메시지와 시간이 같으면 표시 생략)
+    const showTime =
+      !nextMsg ||
+      formatTime(nextMsg.receivedDate) !== formatTime(msg.receivedDate);
+
+    return (
+      <div
+        key={`chat-${msg.chatNo}-${msg.userNo}`}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: msg.isMine ? "flex-end" : "flex-start",
+          marginBottom: 10,
+        }}
+      >
+        {/* 날짜가 바뀌었을 때만 divider + 날짜 */}
+        {isNewDay && currentDateKey && (
+
           <div
             key={msg.chatNo ? msg.chatNo : `msg-${index}`}
             style={{
@@ -601,9 +645,27 @@ const isUnread = (msg: ChatMessage) => {
                 alignSelf: msg.isMine ? "flex-start" : "flex-end",
               }}
             >
-              {msg.unreadCount}명 안 읽음
+
+              {/* 원하는 형식으로 날짜 표시 (예: YYYY년 MM월 DD일 dddd) */}
+              {dayjs
+                .utc(msg.receivedDate, "YYYY-MM-DD HH:mm:ss")
+                .locale("ko")
+                .format("YYYY년 MM월 DD일 dddd")}
             </div>
-          )}
+            <div
+              className="right-divider"
+              style={{ flex: 1, height: "1px", background: "#E0E0E0" }}
+            />
+          </div>
+        )}
+
+            {/* ✅ 안 읽은 메시지 표시 */}
+            {typeof unreadCounts[msg.chatNo] === 'number' && unreadCounts[msg.chatNo] > 0 && (
+              <div style={{ fontSize: 10, color: "red", marginTop: 2, alignSelf: "flex-end" }}>
+                안 읽은 메시지: {unreadCounts[msg.chatNo]}개
+              </div>
+            )}
+
 
             {/* (6) 프로필 이미지 표시 (내 메시지가 아닌 경우, 작성자가 바뀌었을 때) */}
             {!msg.isMine && !isSameUserAsBefore && (
@@ -623,7 +685,7 @@ const isUnread = (msg: ChatMessage) => {
                 >
                   <img
                     style={{ width: "22px", height: "22px", objectFit: "cover" }}
-                    src={msg.profileImg || profile}
+                    src={profile}
                     alt="profile"
                   />
                 </div>
@@ -670,20 +732,63 @@ const isUnread = (msg: ChatMessage) => {
                 </div>
               )}
 
-              {showTime && (
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: "#B3B3B3",
-                    position: "absolute",
-                    bottom: -20,
-                    right: msg.isMine ? "0px" : "0",
-                    left: msg.isMine ? "0px" : "50px",
-                  }}
-                >
-                  {formatTime(msg.receivedDate)}
-                </div>
-              )}
+
+              <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+                {!msg.isMine && (
+                  <div
+                    style={{
+                      background: "#E9EBF1",
+                      wordBreak: "break-word",
+                      padding: "11px",
+                      borderRadius: "7px",
+                      fontSize: "12px",
+                      color: "black",
+                      maxWidth: "230px",
+                      marginLeft: !msg.isMine ? "50px" : "0px",
+                      marginRight: msg.isMine ? "5px" : "0px",
+                      marginBottom: "-5px"
+                    }}
+                  >
+                    {msg.message}
+                  </div>
+                )}
+                {msg.isMine && (
+                  <div
+                    style={{
+                      background: "#D2E3FF",
+                      padding: "11px",
+                      borderRadius: "7px",
+                      fontSize: "12px",
+                      color: "black",
+                      maxWidth: "230px",
+                      wordBreak: "break-word",
+                      marginLeft: "0px",
+                      marginRight: "5px",
+                      marginBottom: "-5px",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {msg.message}
+                  </div>
+                )}
+
+                {/* 시간 표시 */}
+                {showTime && (
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: "#B3B3B3",
+                      position: "absolute",
+                      bottom: -20,
+                      right: msg.isMine ? "0px" : "0",
+                      left: msg.isMine ? "0px" : "50px",
+                    }}
+                  >
+                    {formatTime(msg.receivedDate)}
+                  </div>
+                )}
+              </div>
+
             </div>
 
             

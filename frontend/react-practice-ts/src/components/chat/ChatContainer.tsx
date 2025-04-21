@@ -6,7 +6,6 @@ import settingIcon from "../../assets/Images/chat/setting.png";
 
 const ChatContainer = ({
       children,
-      onClose,
       onChatClick,
       onProfileClick,
       onOrgClick,

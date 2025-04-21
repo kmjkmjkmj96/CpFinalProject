@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import SearchClick from './SearchClick';
 import { useDispatch, useSelector } from "react-redux";
 import { setMemberInvite } from "../../features/chatSlice";
 import { RootState } from "../../store";

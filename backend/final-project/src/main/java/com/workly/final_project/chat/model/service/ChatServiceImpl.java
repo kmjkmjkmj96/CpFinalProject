@@ -298,6 +298,19 @@ public class ChatServiceImpl implements ChatService {
 	    }
 	}
 
+	
+	// 실시간 안읽음 갯수 업데이트
+	@Override
+	public List<Integer> getChatNosToUpdate(int chatRoomNo, int lastReadChatNo) {
+		return chatDao.getChatNosToUpdate(chatRoomNo, lastReadChatNo);
+	}
+
+	@Override
+	public int getUnreadCount(int chatRoomNo, int chatNo) {
+		return chatDao.getUnreadCount(chatRoomNo, chatNo);
+	
+	}
+
 
 
 
