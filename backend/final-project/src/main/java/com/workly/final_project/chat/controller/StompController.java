@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.workly.final_project.chat.model.dao.ChatDao;
 import com.workly.final_project.chat.model.dto.ChatStatusUpdateDTO;
-import com.workly.final_project.chat.model.service.ChatPresenceService;
 import com.workly.final_project.chat.model.service.ChatService;
 import com.workly.final_project.chat.model.vo.Chat;
+import com.workly.final_project.chat.model.vo.UserChat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,21 +29,17 @@ import lombok.extern.slf4j.Slf4j;
 public class StompController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
-
     private final ChatDao chatDao;
     // 채팅 메세지 저장 및 전송 + 알림
     @MessageMapping("/chat/sendMessage/{chatRoomNo}")
     public void sendMessage(@DestinationVariable int chatRoomNo, @Payload Chat chat) {
         log.info(":말풍선: [WebSocket] 메시지 수신: roomNo={}, message={}", chatRoomNo, chat);
         
-
-
         try {
             // 1. DB 저장
             chatService.saveChatMessage(chat);
-            log.info("[DB 저장 완료] 저장된 메시지: {}", chat);
+            log.info(":흰색_확인_표시: [DB 저장 완료] 저장된 메시지: {}", chat);
         } catch (Exception e) {
-
             log.error(":x: [DB 저장 실패]", e);
             return; // 에러 났으면 뒤에 진행하지 않도록 중단
         }
@@ -120,20 +116,15 @@ public class StompController {
         }
     }
 
+     //채팅 메세지 목록 조회
     @GetMapping("/api/chat/messages/{chatRoomNo}")
-    public ResponseEntity<List<Chat>> getChatMessages(@PathVariable int chatRoomNo) {
-        // 1) DB에서 메시지 목록 가져오기
+    public ResponseEntity<?> getChatMessages(@PathVariable int chatRoomNo) {
         List<Chat> messages = chatService.getChatMessages(chatRoomNo);
-
-        // 2) 각 메시지별로 unreadCount 계산
-        for (Chat msg : messages) {
-            List<Integer> unreadUsers = chatService.getUnreadUserList(chatRoomNo, msg.getChatNo());
-            msg.setUnreadCount(unreadUsers.size());
+        if (messages == null || messages.isEmpty()) {
+            return ResponseEntity.ok(List.of()); 
         }
-
         return ResponseEntity.ok(messages);
     }
-
     // 채팅방 나가기(진짜로 나가는거 x)
     @PostMapping("/api/chat/leave") // 관련 주소 exit에서 leave로 변경
     public ResponseEntity<String> exitChatRoom(@RequestBody UserChat userChat) {
@@ -189,11 +180,10 @@ public class StompController {
             int lastReadChatNo = chatService.getLastReadChatNo(userNo, chatRoomNo);
             return ResponseEntity.ok(lastReadChatNo);
         } catch (Exception e) {
-            log.error("[STOMP] lastReadChatNo 조회 실패", e);
+            log.error(":x: lastReadChatNo 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(-1);
         }
     }
-    
     @PostMapping("/api/chat/saveMessage")
     public ResponseEntity<?> saveChatMessage(@RequestBody Chat chat) {
         try {

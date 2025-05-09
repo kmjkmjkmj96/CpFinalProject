@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { RootState } from "./store";
 
-const backendHost = "192.168.200.183";
+const backendHost = "192.168.200.115";
 
 const StompContext = createContext<Client | null>(null);
 

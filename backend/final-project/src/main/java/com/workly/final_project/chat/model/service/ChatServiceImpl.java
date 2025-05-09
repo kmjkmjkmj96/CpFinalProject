@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ChatServiceImpl implements ChatService {
 
     private final ChatDao chatDao;
-    private final ChatPresenceService chatPresenceService;
 
     @Override
     public List<MemberDeptPositionDTO> getChatMembers() {
@@ -264,12 +263,10 @@ public class ChatServiceImpl implements ChatService {
 	public List<Integer> getUnreadUserList(int chatRoomNo, int currentChatNo) {
 	    List<Integer> participantUserNos = chatDao.getUserNosByChatRoom(chatRoomNo);
 	    List<Integer> unreadUserNos = new ArrayList<>();
-
+	    
 	    for (Integer userNo : participantUserNos) {
-	        // 온라인 여부 체크 제거 또는 조건을 변경합니다.
-	        // if (chatPresenceService.isOnline(chatRoomNo, userNo)) {
-	        //     continue;
-	        // }
+	        // 보낸 사람은 제외 (자기 자신에게 알림 전송할 필요 없음)
+	        // 또는 필요에 따라 필터 처리
 	        int lastReadChatNo = getLastReadChatNo(userNo, chatRoomNo);
 	        if (lastReadChatNo < currentChatNo) {
 	            unreadUserNos.add(userNo);
@@ -277,7 +274,6 @@ public class ChatServiceImpl implements ChatService {
 	    }
 	    return unreadUserNos;
 	}
-
 	
 	// 사내공지 채팅방 생성
 	@Override

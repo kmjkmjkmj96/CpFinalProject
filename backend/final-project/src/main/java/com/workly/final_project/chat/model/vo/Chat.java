@@ -20,5 +20,4 @@ public class Chat {
 	private String receivedDate;
 	private int userNo;
 	private String userName;
-	private int unreadCount;
 }
