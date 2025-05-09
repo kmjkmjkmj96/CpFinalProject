@@ -399,7 +399,7 @@ const handleClose = async () => {
 
 
 
-const updateUserChatStatus = async () => {
+const updateUserChatStatus = async (chatNo:number) => {
   try {
       await axios.put(`http://${backendHost}:8003/workly/api/chat/updateStatus/${room.chatRoomNo}/${currentUser.userNo}`);
       console.log("✅ [프론트엔드] updateUserChatStatus 요청 완료");

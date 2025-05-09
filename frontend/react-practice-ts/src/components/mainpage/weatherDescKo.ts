@@ -1,5 +1,5 @@
 
-const weatherDescKo = {
+const weatherDescKo : Record<number, string> = {
     201: '가벼운 비를 동반한 천둥구름',
     200: '비를 동반한 천둥구름',
     202: '폭우를 동반한 천둥구름',

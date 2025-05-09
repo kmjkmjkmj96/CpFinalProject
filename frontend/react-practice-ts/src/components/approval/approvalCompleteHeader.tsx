@@ -4,7 +4,8 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { format, addHours } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { times } from "lodash";
+//import { times } from "lodash";
+
 
 
 
@@ -14,16 +15,16 @@ export const ApprovalCompleteHeader = () => {
   const [approvalLine, setApprovalLine] = useState([]);
   const [writeUser, setWriteUser] = useState<{userName: string} | null>(null);
   const [attachments, setAttachments] = useState<{ fileName: string; fileUrl: string }[]>([]);
-  const [error, setError] = useState<string | null>(null); // ✅ 추가
+  const [_error, setError] = useState<string | null>(null); // ✅ 추가
   const approvers = approvalLine.filter(line => line.type == '결재자');
   const references = approvalLine.filter(line => line.type == '참조자');
   // redux에서 가져온 userNo
   const userNo = useSelector((state: any) => state.user.userNo);
   
-  const [formattedDate, setFormattedDate] = useState("N/A"); // 시간 이상함
+  const [_formattedDate, _setFormattedDate] = useState("N/A"); // 시간 이상함
 
   // ✅ date-fns를 활용한 시간 변환 함수
-  const convertToKST = (timestamp) => {
+  const convertToKST = (timestamp:any) => {
     if (!timestamp) {
       console.error("⛔ 오류: timestamp가 존재하지 않습니다!", timestamp);
       return "N/A";
@@ -117,7 +118,7 @@ export const ApprovalCompleteHeader = () => {
       setApprovalLine(lineRes);
       
       if (attachRes.length > 0) {
-        const attachmentList = attachRes.map(file => ({
+        const attachmentList = attachRes.map((file:any) => ({
           fileName: file.fileName,
           fileUrl: URL.createObjectURL(new Blob(
             [Uint8Array.from(atob(file.fileData), c => c.charCodeAt(0))], // 이 부분 변경 필요

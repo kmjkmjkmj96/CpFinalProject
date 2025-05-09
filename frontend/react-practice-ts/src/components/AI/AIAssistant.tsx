@@ -25,7 +25,7 @@ const AIAssistant: React.FC = () => {
     setIsRecording(true);
     recognition.start();
 
-    recognition.onresult = event => {
+    recognition.onresult = (event:any) => {
       const transcript = event.results[0][0].transcript;
       setInputText(transcript);
       setIsRecording(false);

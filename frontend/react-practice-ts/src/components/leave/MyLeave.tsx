@@ -11,7 +11,7 @@ const MyLeave = () => {
     const [pageInfo, setPageInfo] = useState({}); 
     const [currentPage, setCurrentPage] = useState(1);
 
-    let user = useSelector((state) => {
+    let user = useSelector((state:any) => {
         return state.user;
     });
 
@@ -20,7 +20,7 @@ const MyLeave = () => {
     }
 
     const handleChange = (e: { target: { name: string; }; }) => {
-        const newYear = e.target.name === 'minus' ? year - 1 : year + 1; 
+        const newYear = (e.any as HTMLButtonElement).name === 'minus' ? year - 1 : year + 1; 
 
         if(user.userName) {
             const hireYear = new Date(user.hireDate).getFullYear();

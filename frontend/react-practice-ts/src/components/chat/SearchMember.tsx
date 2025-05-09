@@ -124,7 +124,7 @@ const handleConfirm = async () => {
   }, {});
 
   // 검색창 열림
-  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(true); // ✅ 검색창 열림/닫힘 관리 추가
+  const [_isSearchOpen, setIsSearchOpen] = useState<boolean>(true); // ✅ 검색창 열림/닫힘 관리 추가
 
   return (
     <div

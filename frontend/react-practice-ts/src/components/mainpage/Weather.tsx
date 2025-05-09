@@ -30,7 +30,7 @@ const Weather = () => {
         })
     }
 
-    const getForecast = async (lat, lon) => {
+    const getForecast = async (lat:any, lon:any) => {
         await axios.get(
             `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=kr`
         )
@@ -66,14 +66,15 @@ const Weather = () => {
         .finally(() => setIsLoading(false));
     }
 
-    const getWeather = async (lat, lon) => {
+    const getWeather = async (lat:any, lon:any) => {
         try {
             const res = await axios.get(
                 `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
             );
             
-            const weatherId = res.data.weather[0].id;
-            const weatherKo = weatherDescKo[weatherId]; // id 찾아서 매칭 후 description 한글 번역
+            const weatherId: number = res.data.weather[0].id;
+const weatherKo = weatherDescKo[weatherId];
+ // id 찾아서 매칭 후 description 한글 번역
 
             const weatherIcon = res.data.weather[0].icon;
             const weatherIconAdrs = `https://openweathermap.org/img/wn/${weatherIcon}@2x.png`; // 날씨 아이콘 
@@ -137,7 +138,7 @@ const Weather = () => {
                     </div>
                 </div>
                 <div className={styles.forecast}>
-                    { forecast.map((e, i) => (
+                    { forecast.map((e:any, i) => (
                         <div key={i} className={styles.day}>
                             <div className={styles.datSection}>
                                 <div className={styles.forecastDay}>{e.day}</div>

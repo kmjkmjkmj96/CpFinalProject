@@ -4,7 +4,7 @@ import axios from '../../utils/CustomAxios'
 import PolicyModal from './PolicyModal';
 
 const LeavePolicy = () => {
-    const [policy, setPolicy] = useState([]);
+    const [policy, setPolicy] = useState<any[]>([]);
     const [openModal, setOpenModal] = useState(false);
     const [policyDetail, setPolicyDetail] = useState(0);
 
@@ -19,7 +19,7 @@ const LeavePolicy = () => {
             })
     }
 
-    const handleModal = (i) => {
+    const handleModal = (i:any) => {
         setPolicyDetail(i);
         setOpenModal(true);
     }

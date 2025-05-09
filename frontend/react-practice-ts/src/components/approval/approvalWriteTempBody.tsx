@@ -2,9 +2,9 @@ import { useEffect } from "react";
 
 const ApprovalWriteTempBody = ({ approvalData, setApprovalData }) => {
   // ✅ 모든 입력 필드의 상태를 업데이트하는 함수
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target;
-    setApprovalData((prevData) => ({
+    setApprovalData((prevData:any) => ({
       ...prevData,
       [name]: value,
     }));

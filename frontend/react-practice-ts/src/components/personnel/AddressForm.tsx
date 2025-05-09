@@ -1,9 +1,9 @@
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 
-const AddressForm = ({setAddressApi}) => {
+const AddressForm = ({setAddressApi}:any) => {
   const open = useDaumPostcodePopup();
 
-  const handleComplete = (data) => {
+  const handleComplete = (data:any) => {
     let fullAddress = data.address;
     let extraAddress = '';
 

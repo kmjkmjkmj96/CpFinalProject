@@ -10,7 +10,7 @@ export const ApprovalWriteTempHeader = ({approvalData, setApprovalData, selected
     const [leaveType, setLeaveType] = useState(""); // ✅ 휴가원 선택 시 기안양식 (연차, 반차 등)
     const [startLeaveDate, setStartLeaveDate] = useState(""); // ✅ 연차 시작일
     const [endDate, setEndDate] = useState(""); // ✅ 연차 종료일
-    const [halfDayDate, setHalfDayDate] = useState(""); // ✅ 반차 날짜
+    const [_halfDayDate, setHalfDayDate] = useState(""); // ✅ 반차 날짜
     const [leaveDays, setLeaveDays] = useState(0); // ✅ 사용 연차 일수
 
 

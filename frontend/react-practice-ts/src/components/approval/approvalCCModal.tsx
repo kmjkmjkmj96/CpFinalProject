@@ -1,6 +1,7 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import React from "react";
 
 interface Employee {
   USER_NO: number;
@@ -38,7 +39,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
 
   // 직원 선택
   const handleSelect = (employee: Employee) => {
-    if(!selectedCCUsers.some((user) => user.USER_NO === employee.USER_NO)){
+    if(!selectedCCUsers.some((user: any) => user.USER_NO === employee.USER_NO)){
       const updatedUsers = [...selectedCCUsers, employee];
       setSelectedCCUsers(updatedUsers);
     }
@@ -46,7 +47,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
   
   // 선택한 직원 제거
   const handleRemove = (userNo: number) => {
-    const updatedUsers = selectedCCUsers.filter((user) => user.USER_NO !== userNo);
+    const updatedUsers = selectedCCUsers.filter((user:any) => user.USER_NO !== userNo);
     setSelectedCCUsers(updatedUsers);
   };
 
@@ -117,7 +118,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
           {/* ✅ 선택된 사원 목록 */}
           <div style={selectedListContainer}>
             <ul style={selectedList}>
-              {selectedCCUsers.map((user, index) => (
+              {selectedCCUsers.map((user:any, index:any) => (
                 <li key={user.USER_NO} style={selectedItem}>
                 <span style={{ marginRight: "10px" }}>{index + 1}.</span>
                 <span style={{ marginRight: "15px" }}>{user.DEPT_NAME}</span>

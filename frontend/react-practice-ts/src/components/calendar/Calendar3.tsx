@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import FullCalendar from "@fullcalendar/react";
 import { EventInput, EventClickArg } from "@fullcalendar/core";

@@ -86,7 +86,7 @@ const MeetingRoom = () => {
             };
           })
           // 정렬: 먼저 시작시간 오름차순, 시작시간이 같으면 회의실명 오름차순
-          .sort((a, b) => {
+          .sort((a:any, b:any) => {
             const timeA = a.time.split('~')[0];
             const timeB = b.time.split('~')[0];
 

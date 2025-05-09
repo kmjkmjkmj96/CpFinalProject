@@ -22,7 +22,7 @@ pdfMake.fonts = {
 
 export const ApprovalCompleteDocument = () => {
   const { approvalNo } = useParams();
-  const [approvalContent, setApprovalContent] = useState<string | null>(null);
+  const [_approvalContent, setApprovalContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("결재 문서.pdf");
   const documentRef = useRef<HTMLDivElement>(null);
   const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export const ApprovalCompleteDocument = () => {
       {/* 파일 정보 표시 */}
       <div style={fileInfoStyle}>
         <span style={fileNameStyle}>{fileName}</span>
-        <a href={generatedFileUrl} download={fileName} style={downloadLinkStyle}>
+        <a href={generatedFileUrl?? undefined} download={fileName} style={downloadLinkStyle}>
           다운로드
         </a>
       </div>
@@ -81,7 +81,7 @@ export const ApprovalCompleteDocument = () => {
       {/* 결재 문서 미리보기 */}
       <div ref={documentRef} style={previewContainerStyle}>
         <iframe
-          src={generatedFileUrl}
+          src={generatedFileUrl?? undefined}
           style={iframeStyle}
           title="문서 미리보기"
         ></iframe>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import styles from '../../styles/personnel/DeptPositionSelect.module.css'
 import axios from '../../utils/CustomAxios'
 
-const DeptPositionSelect = ({positionNo, deptNo, handleChange}) => {
+const DeptPositionSelect = ({positionNo, deptNo, handleChange}:any) => {
 
     const [dept, setDept] = useState([]);
     const [position, setPosition] = useState([]);
@@ -28,7 +28,7 @@ const DeptPositionSelect = ({positionNo, deptNo, handleChange}) => {
             <select name="deptNo" value={selectedDept} className={styles.input} onChange={handleChange} required>
                 <option value="0" disabled >부서명</option>
                 { 
-                    dept.map(function(e, i){
+                    dept.map(function(e:any, _i){
                         return (
                             <option key={e.deptNo} value={e.deptNo}>{e.deptName}</option>    
                         )
@@ -38,7 +38,7 @@ const DeptPositionSelect = ({positionNo, deptNo, handleChange}) => {
             <select name="positionNo" value={selectedPosition} className={styles.input} onChange={handleChange} required>
                 <option value="0" disabled>직급명</option>
                 {
-                    position.map(function(e,i) {
+                    position.map(function(e:any,_i) {
                         return (
                             <option key={e.positionNo} value={e.positionNo}>{e.positionName}</option>    
                         )

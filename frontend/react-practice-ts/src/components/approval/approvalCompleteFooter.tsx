@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { ApprovalMemoModal } from "./approvalMemoModal";
 import { useState } from "react";
 
 export const ApprovalCompleteFooter = () => {
 
-    const [modalOpen, setModalOpen] = useState(false);
+    const [_modalOpen, _setModalOpen] = useState(false);
     const navigate = useNavigate();
     
     return (

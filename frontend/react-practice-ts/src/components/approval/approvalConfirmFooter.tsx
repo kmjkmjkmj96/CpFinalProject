@@ -11,7 +11,7 @@ export const ApprovalConfirmFooter = () => {
     const [approveModalOpen, setApproveModalOpen] = useState(false);
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
 
-    const handleSave = (memoContent) => {
+    const handleSave = (memoContent:any) => {
         console.log("Memo Content:", memoContent);
         setApproveModalOpen(false);
         setRejectModalOpen(false);

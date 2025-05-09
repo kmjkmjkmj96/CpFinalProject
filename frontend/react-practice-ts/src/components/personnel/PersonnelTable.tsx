@@ -34,7 +34,7 @@ const PersonnelTable = () => {
             console.log("받아온 데이터:", response.data);
     
             const filteredData = response.data.members.filter(
-                (member) => member.member.companyId === companyId
+                (member:any) => member.member.companyId === companyId
             );
             console.log(filteredData);
 
@@ -51,7 +51,7 @@ const PersonnelTable = () => {
         fetchPesonnel();
     }, [currentPage, category, searchMember]);
 ``
-    const phoneFormat = (phone) => {
+    const phoneFormat = (phone:any) => {
         return phone.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
     };
 
@@ -81,7 +81,7 @@ const PersonnelTable = () => {
                     </tr>
                 </thead>
                 { <tbody>
-                    {personnelList.map((e, i) => (
+                    {personnelList.map((e:any, i) => (
                         <tr key={i} className={styles.rowStyle} 
                             onClick={() => navigate(`/personnel/${e.member.userNo}`)}>
                             <td className={styles.tdStyle}>{e.member.userNo}</td>

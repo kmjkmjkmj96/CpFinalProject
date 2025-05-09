@@ -9,10 +9,10 @@ const AdminPolicyManager: React.FC = () => {
   const [answer, setAnswer] = useState<string>("");
   const [policies, setPolicies] = useState<{ question: string; answer: string }[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null); // 수정 중인 항목 인덱스
-  const [originalQuestion, setOriginalQuestion] = useState<string>(""); // 원래 질문 저장
+  const [_originalQuestion, setOriginalQuestion] = useState<string>(""); // 원래 질문 저장
   const [searchTerm, setSearchTerm] = useState<string>(""); // 검색어 상태 추가
   const [filteredPolicies, setFilteredPolicies] = useState<{ question: string; answer: string }[]>([]); // 검색 결과 저장
-  const [originalAnswer, setOriginalAnswer] = useState<string>(""); // 원래 답변 저장
+  const [_originalAnswer, setOriginalAnswer] = useState<string>(""); // 원래 답변 저장
 
   // 기존 사내 규정 불러오기
   useEffect(() => {

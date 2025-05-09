@@ -60,12 +60,10 @@ const chatSlice = createSlice({
         },
 
         setChatRooms: (state, action: PayloadAction<ChatRoom[]>) => {
-           // console.log("💬 Redux 상태 업데이트: 채팅방 목록 저장됨!", action.payload);
-            state.chatRooms = action.payload; // ✅ 채팅방 목록 업데이트
+            state.chatRooms = action.payload; 
         },
 
         addChatRoom: (state, action: PayloadAction<ChatRoom>) => {
-            console.log("💬 새로운 채팅방 추가됨:", action.payload);
             state.chatRooms.push(action.payload);
         },
     },
