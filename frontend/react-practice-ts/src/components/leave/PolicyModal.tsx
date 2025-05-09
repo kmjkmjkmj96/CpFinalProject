@@ -2,10 +2,10 @@ import { useState } from 'react';
 import styles from '../../styles/leave/PolicyModal.module.css';
 import axios from '../../utils/CustomAxios';
 
-const PolicyModal = ({setOpenModal, policy, policyDetail, fetchPolicy}) => {
+const PolicyModal = ({setOpenModal, policy, policyDetail, fetchPolicy}:any) => {
     const [detail, setDetail] = useState(policy[policyDetail]);
 
-    const changeLeaveDays = (e) => {
+    const changeLeaveDays = (e:any) => {
         setDetail({
             ...detail,
             leaveDays: Number(e.target.value)

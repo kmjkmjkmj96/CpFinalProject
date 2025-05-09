@@ -12,7 +12,7 @@ export const ApprovalWritePage = () => {
   const userNo = useSelector((state: any) => state.user.userNo);
   
   const [selectedCCUsers, setSelectedCCUsers] = useState([]); // 참조자 목록 상태 추가
-  const [searchParams] = useSearchParams();
+  const [_searchParams] = useSearchParams();
   const [approvalNo, setApprovalNo] = useState<number | null>(null); // 결재 번호 상태 추가
 
   useEffect(() => {

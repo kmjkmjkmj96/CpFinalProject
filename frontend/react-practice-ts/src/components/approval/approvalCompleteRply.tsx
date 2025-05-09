@@ -20,7 +20,7 @@ const ApprovalCompleteReply: React.FC<ApprovalCompleteReplyProps> = () => {
   const userNo = useSelector((state: any) => state.user.userNo);
   const {approvalNo} = useParams(); // URL에서 approvalNo 가져오기
   const [approvalComments, setApprovalComments] = useState<ApprovalComment[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [editingComment, setEditingComment] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>("");
 
@@ -55,7 +55,7 @@ const ApprovalCompleteReply: React.FC<ApprovalCompleteReplyProps> = () => {
       .delete(`http://localhost:8003/workly/api/approvalMemos/deleteApprovalReply`, {
         data: {memoNo},
       })
-      .then((response) => {
+      .then((_response) => {
         setApprovalComments(approvalComments.filter((c) => c.MEMO_NO !== memoNo));
       })
       .catch((err) => {

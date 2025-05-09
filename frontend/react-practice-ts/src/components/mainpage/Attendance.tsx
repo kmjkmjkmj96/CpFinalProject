@@ -20,14 +20,14 @@ const Attendance = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const formatDate = (time) => {
+    const formatDate = (time:any) => {
         const year = time.getFullYear();
         const month = String(time.getMonth() + 1).padStart(2, "0");
         const day = String(time.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
     };
 
-    const formatTime = (time) => {
+    const formatTime = (time:any) => {
         const hours = String(time.getHours()).padStart(2, "0");
         const minutes = String(time.getMinutes()).padStart(2, "0");
         const seconds = String(time.getSeconds()).padStart(2, "0");
@@ -78,7 +78,7 @@ const Attendance = () => {
         })
     }
 
-    const formatTimestamp= (timestamp) =>{
+    const formatTimestamp= (timestamp:any) =>{
         const date = new Date(timestamp);
         
         const month = date.getMonth() + 1;

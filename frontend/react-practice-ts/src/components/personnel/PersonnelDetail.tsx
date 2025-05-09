@@ -60,7 +60,7 @@ const PersonnelDetail = () => {
             })
     }, []);
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e:any) => {
         const file = e.target.files[0];
 
         if (file.size > 3 * 1024 * 1024) {
@@ -72,7 +72,7 @@ const PersonnelDetail = () => {
         setPreview(URL.createObjectURL(file));
     }
 
-    const handleFileCancle = (e) => {
+    const handleFileCancle = (e:any) => {
         setPreview("");
         setProfileImg(null);
     }
@@ -81,12 +81,12 @@ const PersonnelDetail = () => {
         fileInputRef.current.click();
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e:any) => {
         setMember({ ...member, [e.target.name]: e.target.value});
         console.log(member);
     };
 
-    const handleUpdate = async (e) => {
+    const handleUpdate = async (e:any) => {
         e.preventDefault();
 
         const formData = new FormData();

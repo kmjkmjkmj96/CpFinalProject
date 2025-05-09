@@ -22,15 +22,6 @@ const Alarm = ({ chatRooms,
   onNoticeClick }: AlarmProps) => {
   const [filter, setFilter] = useState<"all" | "notified" | "muted">("all");
   
-  // const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
-  //   { no: 1, roomTitle: "김자수", chatType: "dm", isActive: true, unreadCount: 2, bellSetting: true },
-  //   { no: 2, roomTitle: "채소염", chatType: "dm", isActive: false, bellSetting: false },
-  //   { no: 3, roomTitle: "법무팀 채팅방", chatType: "group", unreadCount: 100, bellSetting: true },
-  //   { no: 4, roomTitle: "인사팀 채팅방", chatType: "group", unreadCount: 15, bellSetting: false },
-  //   { no: 5, roomTitle: "안관주", chatType: "dm", isActive: true, unreadCount: 6, bellSetting: true },
-  //   { no: 6, roomTitle: "디자인팀 채팅방", chatType: "group", bellSetting: true },
-  // ]);
-
   // 알림 상태 토글 함수
   const toggleNotification = (no: number) => {
     setChatList((prev) =>

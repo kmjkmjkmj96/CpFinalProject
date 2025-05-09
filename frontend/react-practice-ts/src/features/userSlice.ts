@@ -46,7 +46,7 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        loginUser(state, data) {
+        loginUser(_state, data) {
             const user = data.payload;
 
             localStorage.setItem("user", JSON.stringify(data.payload));
@@ -67,7 +67,7 @@ const userSlice = createSlice({
                 companyId: user.companyId || 0
             }
         },
-        logoutUser(state) {
+        logoutUser(_state) {
             localStorage.removeItem("user");
             return {
                 userNo: 0,

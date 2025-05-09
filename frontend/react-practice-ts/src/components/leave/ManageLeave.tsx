@@ -5,13 +5,24 @@ import MemberSearchModal from './MemberSearchModal';
 import axios from '../../utils/CustomAxios';
 import { format } from 'date-fns';
 
+interface LeaveHistoryItem {
+  leaveHistory: {
+    leaveType: string;
+    startDate: string;
+    endDate: string;
+    leaveDays: number;
+    approvalStatus: number;
+  };
+}
+
+
 const ManageLeave = () => {
     const [openModal, setOpenModal] = useState(false); // 모달창 열기
     const [memberList, setMemberList] = useState([]); // 모달창 사원 리스트
     const [year, setYear] = useState(new Date().getFullYear()); // 선택 연도
     const [updateLeave, setUpdateLeave] = useState(1); // 총 연차 변경 state
     const [annualLeave, setAnnualLeave] = useState({}); // 해당 사원의 연도별 휴가 수
-    const [leaveHistory, setleaveHistory] = useState([]); // 해당 사원의 연도별 휴가 내역
+    const [leaveHistory, setleaveHistory] = useState<LeaveHistoryItem[]>([]); // 해당 사원의 연도별 휴가 내역
     const [user, setUser] = useState({ // header의 사원 정보
         userNo: 1,
         userName: "",
@@ -20,8 +31,9 @@ const ManageLeave = () => {
         status: "",
         hireDate: ""
     });
+    
 
-    const handleChange = (e) => {
+    const handleChange = (e:any) => {
         const newYear = e.target.name === 'minus' ? year - 1 : year + 1; 
 
         if(user.userName) {

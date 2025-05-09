@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import styles from '../../styles/leave/MemberSearchModal.module.css';
 
-const MemberSearchModal = ({setUser, setYear, memberList, setOpenModal }) => {
+const MemberSearchModal = ({setUser, setYear, memberList, setOpenModal }:any) => {
     const [searchUser, setSearchUser] = useState("");
     const [filteredUser, setFilterdUser] = useState(memberList);
 
-    const handleDetail = (userNo, userName, deptName, positionName, status, hireDate) => {
+    const handleDetail = (userNo:any, userName:any, deptName:any, positionName:any, status:any, hireDate:any) => {
         setUser({userNo, userName, deptName, positionName, status, hireDate});
         setYear(new Date().getFullYear());
         setOpenModal(false);
@@ -13,7 +13,7 @@ const MemberSearchModal = ({setUser, setYear, memberList, setOpenModal }) => {
 
     useEffect(() => {
         setFilterdUser(
-            memberList.filter(user =>
+            memberList.filter((user: any) =>
                 user.member.userName.includes(searchUser)
             )
         );
@@ -38,7 +38,7 @@ const MemberSearchModal = ({setUser, setYear, memberList, setOpenModal }) => {
                             </tr>
                         </thead>
                         {<tbody>
-                            { filteredUser.map((e, i) => (
+                            { filteredUser.map((e:any, i:any) => (
                                     <tr key={i} className={styles.rowStyle}
                                     onClick={() => handleDetail(
                                         e.member.userNo,

@@ -40,12 +40,12 @@ const MyInfomation = () => {
         fileInputRef.current.click();
     };
 
-    const handleFileCancle = (e) => {
+    const handleFileCancle = (e:any) => {
         setPreview("");
         setProfileImg(null);
     };
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e:any) => {
         const file = e.target.files[0];
 
         if (file.size > 3 * 1024 * 1024) {
@@ -57,13 +57,13 @@ const MyInfomation = () => {
         setPreview(URL.createObjectURL(file));
     }
 
-    const handleChange = (e) => {
+    const handleChange = (e:any) => {
         setMember({ ...member, [e.target.name]: e.target.value });
         console.log(member);
     };
 
 
-    const handleUpdate = async (e) => {
+    const handleUpdate = async (e:any) => {
         e.preventDefault();
 
         if (confirm("내 정보를 수정하시겠습니까?")) {
