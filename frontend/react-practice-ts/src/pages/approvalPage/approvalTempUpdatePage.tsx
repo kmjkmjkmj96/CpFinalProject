@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import ApprovalWriteTempBody from "../../components/approval/approvalWriteTempBody";
-import ApprovalWriteTempFooter from "../../components/approval/approvalWriteTempFooter";
-import ApprovalWriteTempHeader from "../../components/approval/approvalWriteTempHeader";
+import {ApprovalWriteTempFooter} from "../../components/approval/approvalWriteTempFooter";
+import {ApprovalWriteTempHeader} from "../../components/approval/approvalWriteTempHeader";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
 
 export const ApprovalTempUpdatePage = () => {
   const { tempNo } = useParams(); // ✅ URL에서 tempNo 가져오기
   const [approvalData, setApprovalData] = useState(null);
-
-  const { tempNo } = useParams();
   const parsedTempNo = Number(tempNo);
 
   useEffect(() => {

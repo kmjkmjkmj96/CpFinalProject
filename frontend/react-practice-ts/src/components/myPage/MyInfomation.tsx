@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from '../../styles/myPage/MyInfomation.module.css'
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import defaultImg from "../../assets/images/icon/profile.png"
 import axios from '../../utils/CustomAxios';
 import { useSelector } from 'react-redux';
@@ -8,11 +8,11 @@ import AddressForm from '../personnel/AddressForm';
 import ChangePwdModal from './ChangePwdModal';
 
 const MyInfomation = () => {
-    let user = useSelector((state) => {
+    let user = useSelector((state:any) => {
         return state.user;
     });
     const [openModal, setOpenModal] = useState(false);
-
+    
     const [member, setMember] = useState({
         deptNo: 0,
         positionNo: 0,
@@ -29,18 +29,20 @@ const MyInfomation = () => {
     });
 
     const [addressApi, setAddressApi] = useState("");
-    const [profileImg, setProfileImg] = useState(null); // 프로필 이미지
+    const [profileImg, setProfileImg]:any = useState(null); // 프로필 이미지
     const [preview, setPreview] = useState(""); // 프로필 이미지 미리보기
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const url = "http://localhost:8003/workly/uploads/profile/";
 
     const navigate = useNavigate();
 
     const handleImageClick = () => {
+    if (fileInputRef.current) {
         fileInputRef.current.click();
-    };
-
-    const handleFileCancle = (e:any) => {
+    }
+  }
+    
+    const handleFileCancle = (_e:any) => {
         setPreview("");
         setProfileImg(null);
     };
@@ -203,4 +205,5 @@ const MyInfomation = () => {
         </>
     )
 }
+
 export default MyInfomation;

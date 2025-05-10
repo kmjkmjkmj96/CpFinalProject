@@ -35,7 +35,7 @@ const useFetchNotifications = (userNo: number | undefined) => {
         if(!approvalStatusResponse.ok){
             throw new Error(`API 오류: ${approvalStatusResponse.status} ${approvalStatusResponse.statusText}`);
         }
-        const approvalStatusData = await approvalStatusResponse.json();
+        //const approvalStatusData = await approvalStatusResponse.json();
        // console.log("결재 완료/반려 응답 데이터:", approvalStatusData);
         dispatch(fetchApprovalStatus(userNo) as any);
       } catch (error) {
