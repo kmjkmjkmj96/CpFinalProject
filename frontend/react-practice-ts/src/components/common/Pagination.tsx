@@ -1,6 +1,6 @@
 import styles from "../../styles/common/Pagination.module.css";
 
-const Pagination = ({ pageInfo, setCurrentPage }) => {
+const Pagination = ({ pageInfo, setCurrentPage }:any) => {
   if (!pageInfo) return null;
 
   const { currentPage, pageLimit, maxPage } = pageInfo;

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-export const ApprovalWriteFooter = ({ approvalData, selectedCCUsers, submitApproval, approvalNo }) => {
+export const ApprovalWriteFooter = ({ approvalData, selectedCCUsers, submitApproval, approvalNo }:any) => {
     useEffect(() => {
         console.log("footer에서 받은 approvalData:", approvalData);
     }, [approvalData]);
@@ -104,7 +104,7 @@ export const ApprovalWriteFooter = ({ approvalData, selectedCCUsers, submitAppro
                     <ApprovalMemoModal
                         approvalNo={approvalNo} // ✅ 기존 approvalNo 유지
                         onClose={() => setModalOpen(false)}
-                        onSave={(memoContent) => {
+                        onSave={(memoContent:any) => {
                             console.log("🔥 메모 저장 요청:", memoContent, "approvalNo:", approvalData.approvalNo);
                             if (memoContent) {
                                 axios.post("http://localhost:8003/workly/api/approvalMemos/create", {

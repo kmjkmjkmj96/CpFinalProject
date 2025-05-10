@@ -6,9 +6,9 @@ import icon4 from '../../assets/images/icon/4.png';
 import icon5 from '../../assets/images/icon/5.png';
 import icon6 from '../../assets/images/icon/6.png';
 import icon7 from '../../assets/images/icon/7.png';
-import icon8 from '../../assets/images/icon/8.png';
+//import icon8 from '../../assets/images/icon/8.png';
 import icon9 from '../../assets/images/icon/9.png';
-import icon10 from '../../assets/images/icon/10.png';
+//import icon10 from '../../assets/images/icon/10.png';
 import icon11 from '../../assets/images/icon/11.png';
 import icon12 from '../../assets/images/icon/12.png';
 import { Link } from "react-router-dom";
@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state) => {
+  const user = useSelector((state:any) => {
     return state.user;
   });
 

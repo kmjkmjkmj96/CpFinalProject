@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-export const ApprovalMemoModal = ({ onClose, onSave, approvalNo }) => {
+export const ApprovalMemoModal = ({ onClose, onSave, approvalNo }:any) => {
 
   console.log("footer에서 받은 approvalNo값:", approvalNo);
   

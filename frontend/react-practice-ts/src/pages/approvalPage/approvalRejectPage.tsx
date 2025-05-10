@@ -3,9 +3,9 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { ApprovalHeader } from "../../components/approval/approvalHeader";
 import { ApprovalRejectBody } from "../../components/approval/approvalRejectBody";
-import { ApprovalRejectFooter } from "../../components/approval/approvalRejectFooter";
+//import { ApprovalRejectFooter } from "../../components/approval/approvalRejectFooter";
 import { ApprovalSearchBar } from "../../components/approval/approvalSearchBar";
-import { ApprovalFooter } from "../../components/approval/approvalFooter";
+//import { ApprovalFooter } from "../../components/approval/approvalFooter";
 import Header from "../../components/common/Header";
 import Sidebar from "../../components/common/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,8 @@ const formatKST = (dateString: string) => {
   }).replace(/\./g, '').replace(/\s+/g, ' ');
 };
 
+console.log(formatKST);
+
 export const ApprovalRejectPage = () => {
   const userNo = useSelector((state: any) => state.user.userNo);
   const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
@@ -33,6 +35,8 @@ export const ApprovalRejectPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
   const navigate = useNavigate();
+
+  console.log(navigate);
 
   // 초기 데이터 로드
   useEffect(() => {

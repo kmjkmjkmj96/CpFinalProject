@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import ApprovalFavoriteLineModal from "./approvalFavoriteLineModal";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -16,7 +16,7 @@ interface Employee {
   approvalLevel: number;
 }
 
-const ApprovalLineModal = ( {onClose, setApprovalData} ) => {
+const ApprovalLineModal = ( {onClose, setApprovalData}:any ) => {
   const [approvalLine, setApprovalLine] = useState<Employee[]>([]); // 결재자 리스트
   const [favoriteLine, setFavoriteLine] = useState<{ name: string; employees: Employee[] }[]>([]); // 즐겨찾기 리스트
   const [searchTerm, setSearchTerm] = useState(""); // 검색어 상태 추가
@@ -49,7 +49,7 @@ const userNo = useSelector((state: any) => state.user.userNo);
           const groupedFavorites = groupBy(response.data, "FAVORITE_NAME");
 
           // 백엔드에서 받은 데이터를 적절한 형식으로 변환
-          const formattedFavorites = Object.keys(groupedFavorites).map((favName) => ({
+          const formattedFavorites :any= Object.keys(groupedFavorites).map((favName) => ({
             name: favName, // 즐겨찾기 이름
             employees: groupedFavorites[favName].map((emp) => ({
               USER_NO : emp.USER_NO,
@@ -77,7 +77,7 @@ const userNo = useSelector((state: any) => state.user.userNo);
       .then((response) => {
         console.log("백엔드 응답 데이터:", response.data);
 
-        const filteredEmployees = response.data.filter(emp => emp.COMPANY_ID === companyId);
+        const filteredEmployees = response.data.filter((emp:any) => emp.COMPANY_ID === companyId);
         setEmployees(filteredEmployees); // ✅ 필터링된 직원만 저장
       })
       .catch((error) => console.error("데이터 가져오기 실패:", error));
@@ -126,7 +126,7 @@ const userNo = useSelector((state: any) => state.user.userNo);
     
   const handleSaveApprovalLine = () => {
     console.log("결재라인 저장 전 데이터:",  approvalLine);
-    setApprovalData((prevData) => ({
+    setApprovalData((prevData:any) => ({
       ...prevData,
       approvalLine: approvalLine.map((person, index) => ({
         ...person,

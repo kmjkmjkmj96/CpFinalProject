@@ -12,7 +12,7 @@ interface Employee {
   approvalLevel: 1;
 }
 
-const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
+const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }:any) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const companyId = useSelector((state: any) => state.user.companyId);
@@ -25,7 +25,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
       .then((response) => {
         console.log("백엔드 응답 데이터:", response.data);
 
-        const filteredEmployees = response.data.filter(emp => emp.COMPANY_ID === companyId);
+        const filteredEmployees = response.data.filter((emp:any) => emp.COMPANY_ID === companyId);
         setEmployees(filteredEmployees); // ✅ 필터링된 직원만 저장
       })
       .catch((error) => console.error("데이터 가져오기 실패:", error));
@@ -139,7 +139,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }) => {
 };
 
 // ✅ **스타일 정의 (JSX 외부에 위치)**
-const modalOverlay = {
+const modalOverlay:any = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -152,7 +152,7 @@ const modalOverlay = {
   zIndex: 1000
 };
 
-const modalContainer = {
+const modalContainer:any = {
   width: "770px",
   height: "600px",
   background: "white",
@@ -161,7 +161,7 @@ const modalContainer = {
   position: "relative",
 };
 
-const modalHeader = {
+const modalHeader:any = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -171,7 +171,7 @@ const modalHeader = {
   height: "40px",
 };
 
-const closeButton = {
+const closeButton :any= {
   position: "absolute",
   top: "10px",
   right: "10px",
@@ -212,7 +212,7 @@ const contentContainer = {
   fontSize: "12px"
 };
 
-const listContainer = {
+const listContainer:any = {
   flex: 1,
   border: "1px solid #404040",
   borderRadius: "5px",
@@ -220,12 +220,12 @@ const listContainer = {
   height: "400px",
 };
 
-const tableStyle = {
+const tableStyle:any = {
   width: "100%",
   borderCollapse: "collapse",
 };
 
-const thStyle = {
+const thStyle:any = {
   padding: "10px",
   borderBottom: "2px solid #404040",
   background: "#f5f5f5",

@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
-import { ApprovalMark } from "./approvalMark";
+//import { ApprovalMark } from "./approvalMark";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { format, addHours } from "date-fns";
 import { ko } from "date-fns/locale";
-import { isNil } from "lodash";
+//import { isNil } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { fetchApprovalStatus } from "../../features/approvalNotificationsSlice";
 
 interface ApprovalRejectBodyProps {
   selectedPosts: number[];
-  setSelectedPosts: (posts: number[]) => void;
+  setSelectedPosts: React.Dispatch<React.SetStateAction<number[]>>;
   filteredPosts: any[];
   setFilteredPosts: (posts: any[]) => void;
   currentPage: number;
   postsPerPage: number;
   onDelete: () => void;
 }
+
 
 export const ApprovalRejectBody = ({ 
   selectedPosts,
@@ -69,9 +70,9 @@ export const ApprovalRejectBody = ({
 
   // 체크박스 핸들러
   const handleCheckbox = (approvalNo: number) => {
-    setSelectedPosts(prev => {
-      if (prev.includes(approvalNo)) {
-        return prev.filter(id => id !== approvalNo);
+    setSelectedPosts((prev: number[]) => {
+    if (prev.includes(approvalNo)) {
+        return prev.filter((id:any) => id !== approvalNo);
       } else {
         return [...prev, approvalNo];
       }
@@ -81,7 +82,7 @@ export const ApprovalRejectBody = ({
   // 전체 선택 핸들러
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedPosts(posts.map(post => post.approvalNo));
+      setSelectedPosts(posts.map((post:any) => post.approvalNo));
     } else {
       setSelectedPosts([]);
     }
@@ -93,6 +94,8 @@ export const ApprovalRejectBody = ({
       alert("삭제할 문서를 선택해주세요.");
       return;
     }
+
+    console.log(handleDelete);
 
     const isConfirmed = window.confirm("선택한 문서를 삭제하시겠습니까?");
     if (!isConfirmed) return;
@@ -246,6 +249,8 @@ const emptyRowStyle = {
   color: "#888",
 };
 
+console.log(emptyRowStyle);
+
 // ✅ 13자리 숫자를 한국 시간(KST) 형식으로 변환하는 함수
 const formatKST = (timestamp: number | string) => {
   if (!timestamp) return "N/A";
@@ -270,7 +275,7 @@ const getStatusText = (status: number) => {
 };
 
 // ✅ 상태 스타일 함수
-const getStatusStyle = (status: number) => {
+const getStatusStyle:any = (status: number) => {
   let baseStyle = {
     padding: "5px 10px",
     borderRadius: "4px",
@@ -301,7 +306,7 @@ const containerStyle = {
   };
   
   // ✅ 테이블 스타일 (오른쪽으로 이동 & 폭 넓힘)
-  const tableStyle = {
+  const tableStyle:any = {
     width: "90%", // ✅ 기존 90% → 95%로 넓힘
     borderCollapse: "collapse",
     textAlign: "center",
@@ -325,13 +330,13 @@ const tdStyle = {
   color: "#202224",
 };
 
-const tdTitleStyle = {
+const tdTitleStyle:any = {
   ...tdStyle,
   textAlign: "left",
 };
 
 // 아이콘을 위한 셀 스타일 (왼쪽 정렬)
-const tdIconStyle = {
+const tdIconStyle:any = {
   width: "20px", // 아이콘 크기 조정
   textAlign: "center",
 };

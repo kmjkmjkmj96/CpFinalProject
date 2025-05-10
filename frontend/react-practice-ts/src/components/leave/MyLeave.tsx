@@ -6,8 +6,8 @@ import Pagination2 from '../common/Pagination';
 
 const MyLeave = () => {
     const [year, setYear] = useState(new Date().getFullYear());
-    const [history, setHistory] = useState([]); // 연차 사용 내역 리스트
-    const [annualLeave, setAnnualLeave] = useState({}); // 총 연차 수
+    const [history, setHistory]:any = useState([]); // 연차 사용 내역 리스트
+    const [annualLeave, setAnnualLeave]:any = useState({}); // 총 연차 수
     const [pageInfo, setPageInfo] = useState({}); 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -19,8 +19,8 @@ const MyLeave = () => {
         setYear(new Date().getFullYear());
     }
 
-    const handleChange = (e: { target: { name: string; }; }) => {
-        const newYear = (e.any as HTMLButtonElement).name === 'minus' ? year - 1 : year + 1; 
+    const handleChange:any = (e: { target: { name: string; }; }) => {
+        const newYear = e.target.name === 'minus' ? year - 1 : year + 1; 
 
         if(user.userName) {
             const hireYear = new Date(user.hireDate).getFullYear();
@@ -49,7 +49,7 @@ const MyLeave = () => {
                 setAnnualLeave(response.data.list[0].annualLeave);
                 setPageInfo(response.data.pi);
             })
-            .catch((error) => {
+            .catch((_error) => {
                 setHistory([]);
                 setAnnualLeave({
                     totalAnnualLeave : 0,
@@ -96,7 +96,7 @@ const MyLeave = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {history.length > 0 && history[0].leaveHistory !== null && history.map((e, i) => (
+                    {history.length > 0 && history[0].leaveHistory !== null && history.map((e:any, i:any) => (
                         <tr key={i} className={styles.rowStyle}>
                             <td className={styles.tdStyle}>{i + 1}</td>
                             <td className={styles.tdStyle}>{e.leaveHistory.leaveType}</td>

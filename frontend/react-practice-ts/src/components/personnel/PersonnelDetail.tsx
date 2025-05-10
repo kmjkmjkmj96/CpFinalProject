@@ -24,9 +24,9 @@ const PersonnelDetail = () => {
 
     const { userNo } = useParams();
     const [addressApi, setAddressApi] = useState("");
-    const [profileImg, setProfileImg] = useState(null); // 프로필 이미지
+    const [profileImg, setProfileImg]:any = useState(null); // 프로필 이미지
     const [preview, setPreview] = useState(""); // 프로필 이미지 미리보기
-    const fileInputRef = useRef(null);
+    const fileInputRef:any = useRef(null);
     const url = "http://localhost:8003/workly/uploads/profile/";
 
     const navigate = useNavigate();
@@ -72,7 +72,7 @@ const PersonnelDetail = () => {
         setPreview(URL.createObjectURL(file));
     }
 
-    const handleFileCancle = (e:any) => {
+    const handleFileCancle = (_e:any) => {
         setPreview("");
         setProfileImg(null);
     }

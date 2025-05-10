@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 interface SearchBarProps {
   onSearch: (searchParams: SearchParams) => void;
 }
@@ -7,7 +7,7 @@ interface SearchParams {
   year: string;
   searchText: string;
 }
-export const ApprovalSearchBar = ({ onSearch }: SearchBarProps) => {
+export const ApprovalSearchBar:any = ({ onSearch }: SearchBarProps) => {
   const [searchText, setSearchText] = useState("");
   const [approvalType, setApprovalType] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -35,6 +35,7 @@ export const ApprovalSearchBar = ({ onSearch }: SearchBarProps) => {
       handleSearch();
     }
   };
+  console.log(handleKeyPress);
   return (
     <div style={containerStyle}>
       <div style={selectContainerStyle}>

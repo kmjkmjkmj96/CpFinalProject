@@ -24,7 +24,7 @@ export const ApprovalConfirmPage = () => {
 };
 
 // ✅ **스타일 정의 (TSX 내부에서 적용)**
-const scrollableContentStyle = {
+const scrollableContentStyle:any = {
   overflowY: "auto", // ✅ 세로 스크롤바 적용
   maxHeight: "calc(100vh - 100px)", // ✅ 화면 높이에서 일부 여백 제외 (조정 가능)
   paddingRight: "10px", // ✅ 스크롤바 공간 확보

@@ -55,7 +55,7 @@ const formatDate = (dateTimeString: string) => {
 // }
 
 const NoticeChat: React.FC<NoticeChatProps> = ({ onClose }) => {
-  const currentUser = useSelector((state: RootState) => state.user);
+  const currentUser:any = useSelector((state: RootState) => state.user);
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ApprovalLineModal from "./approvalLineModal";
 import ApprovalCCModal from "./approvalCCModal";
 
-export const ApprovalWriteHeader = ({approvalData, setApprovalData, selectedCCUsers = [], setSelectedCCUsers = []}) => {
+export const ApprovalWriteHeader = ({approvalData, setApprovalData, selectedCCUsers = [], setSelectedCCUsers = []}:any) => {
     // ✅ 각각의 모달 상태를 독립적으로 관리
     const [approvalLineModalOpen, setApprovalLineModalOpen] = useState(false);
     const [approvalCCModalOpen, setApprovalCCModalOpen] = useState(false);
@@ -10,11 +10,11 @@ export const ApprovalWriteHeader = ({approvalData, setApprovalData, selectedCCUs
     const [leaveType, setLeaveType] = useState(""); // ✅ 휴가원 선택 시 기안양식 (연차, 반차 등)
     const [startLeaveDate, setStartLeaveDate] = useState(""); // ✅ 연차 시작일
     const [endDate, setEndDate] = useState(""); // ✅ 연차 종료일
-    const [halfDayDate, setHalfDayDate] = useState(""); // ✅ 반차 날짜
+    const [_halfDayDate, setHalfDayDate] = useState(""); // ✅ 반차 날짜
     const [leaveDays, setLeaveDays] = useState(0); // ✅ 사용 연차 일수
 
 
-    const handleApprovalTypeChange = (e) => {
+    const handleApprovalTypeChange = (e:any) => {
       const selectedType = e.target.value;
       setApprovalType(selectedType);
     
@@ -76,7 +76,7 @@ const handleRemoveFile = (index: number) => {
   // approvalData에서도 파일 제거
   setApprovalData((prevData: any) => ({
     ...prevData,
-    attachments: prevData.attachments?.filter((_, i) => i !== index) || [],
+    attachments: prevData.attachments?.filter((_:any, i:any) => i !== index) || [],
   }));
 };
 
@@ -233,7 +233,7 @@ const handleRemoveFile = (index: number) => {
     }}
   >
     {approvalData.approvalLine && approvalData.approvalLine.length > 0 ? (
-      approvalData.approvalLine.map((emp, index) => (
+      approvalData.approvalLine.map((emp:any, index:any) => (
         <div key={index} style={{ marginBottom: "5px" }}>
           {emp.USER_NAME} ({emp.DEPT_NAME} - {emp.POSITION_NAME})
         </div>
@@ -298,7 +298,7 @@ const handleRemoveFile = (index: number) => {
           </button>
           <div style={infoContainer}>
             {selectedCCUsers.length > 0 ? (
-              selectedCCUsers.map((emp, index) => (
+              selectedCCUsers.map((emp:any, index:any) => (
                 <div key={index} style={{ marginBottom: "5px" }}>
                   {emp.USER_NAME} ({emp.DEPT_NAME} - {emp.POSITION_NAME})
                 </div>
@@ -327,7 +327,7 @@ const handleRemoveFile = (index: number) => {
   );
 };
 
-const infoContainer = {
+const infoContainer:any = {
   minHeight: "20px",
   padding: "8px",
   wordBreak: "break-word",
@@ -358,7 +358,7 @@ const fileLinkStyle = {
 };
 
 // 파일 목록을 감싸는 컨테이너 (스크롤 가능)
-const fileListContainerStyle = {
+const fileListContainerStyle:any = {
   maxWidth: "300px", // 파일명이 너무 길 경우 대비
   maxHeight: "60px", // ✅ 최대 높이 설정하여 스크롤 가능하도록 변경
   overflowY: "auto", // ✅ 스크롤이 필요하면 자동으로 활성화

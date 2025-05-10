@@ -46,14 +46,14 @@ const approvalNotificationsSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
-    clearNotification: (state, action) => {
+    clearNotification: (state:any, action) => {
       if (action.payload === "approvalFinish" || action.payload === "approvalReject") return;
       state[action.payload] = 0;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchNotifications.fulfilled, (state, action) => {
+      .addCase(fetchNotifications.fulfilled, (state:any, action) => {
         const notifications = action.payload;
         if (!Array.isArray(notifications)) {
           console.error("Redux 상태 업데이트 오류! 배열이 아님:", notifications);

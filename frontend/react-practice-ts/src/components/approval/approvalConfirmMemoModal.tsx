@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-export const ApprovalConfirmMemoModal = ({ onClose, onSave, approvalNo }) => {
+export const ApprovalConfirmMemoModal = ({ onClose, onSave, approvalNo }:any) => {
 
   const userNo = useSelector((state: any) => state.user.userNo);
   console.log("footer에서 받은 approvalNo값:", approvalNo);
@@ -12,10 +12,10 @@ export const ApprovalConfirmMemoModal = ({ onClose, onSave, approvalNo }) => {
   const handleApprove = async () => {
     try{
       // 1. 결재 승인 요청(STATUS 변경)
-      const approvalResponse = await axios.post("http://localhost:8003/workly/api/approval/approve", {
-        approvalNo: approvalNo,
-        userNo: userNo,
-      })
+      //const approvalResponse = await axios.post("http://localhost:8003/workly/api/approval/approve", {
+      //  approvalNo: approvalNo,
+      //  userNo: userNo,
+      //})
 
       // 2. 현재 사용자가 마지막 결재자인지 확인
       const checkFinalApprover = await axios.get(`http://localhost:8003/workly/api/approval/checkFinalApprover`, {
@@ -32,7 +32,7 @@ export const ApprovalConfirmMemoModal = ({ onClose, onSave, approvalNo }) => {
       // 4. 메모 저장 요청 (userNo 업데이트 후 실행)
       setTimeout(async () => {
         if (memoContent.trim() !== "") {
-          const memoResponse = await axios.post("http://localhost:8003/workly/api/approvalMemos/create", {
+           await axios.post("http://localhost:8003/workly/api/approvalMemos/create", {
             approvalNo: approvalNo,
             userNo: userNo, // 이제 정상적으로 값이 들어감
             memoContent: memoContent,

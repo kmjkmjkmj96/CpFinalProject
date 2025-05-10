@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 const LeaveCategory = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const user = useSelector((state) => {
+    const user = useSelector((state:any) => {
         return state.user;
       });
 

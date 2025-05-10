@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux"
 import { Outlet, useNavigate } from "react-router-dom";
 
-const RoleRoute= ({roles}) => {
+const RoleRoute= ({roles}:any) => {
     const navigate = useNavigate();
     const user = useSelector((state: any) => state.user);
 

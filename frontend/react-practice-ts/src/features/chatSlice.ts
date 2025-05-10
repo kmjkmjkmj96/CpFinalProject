@@ -16,7 +16,7 @@ interface ChatState {
     currentRoomNo: number | null;
     participants: number[];
     unreadMessages: Record<number, number>;
-    memberInvite: string[];  // ✅ 여기에 memberInvite 추가!
+    memberInvite: string[];  
 }
 
 const initialState: ChatState = {
@@ -34,7 +34,7 @@ const chatSlice = createSlice({
     initialState,
     reducers: {
       setFavorites: (state, action: PayloadAction<{ userNo: number; userName: string; deptName: string; positionName: string }[]>) => {        
-            state.favorites = action.payload;  // ✅ 이제 객체 배열을 Redux에 저장
+            state.favorites = action.payload;  
         },
           addFavorite: (state, action: PayloadAction<{ userNo: number; userName: string; deptName: string; positionName: string }>) => {
             if (!state.favorites.some(fav => fav.userNo === action.payload.userNo)) {  // ✅ userNo으로 비교

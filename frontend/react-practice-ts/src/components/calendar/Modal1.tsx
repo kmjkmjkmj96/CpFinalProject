@@ -47,7 +47,7 @@ function ForceAlertInModal({
 const Modal1: React.FC<Modal1Props> = ({
   isOpen,
   onClose,
-  onSave,
+  //onSave,
   onDelete,
   setMeetingRoomEvents,
   selectedEvent,

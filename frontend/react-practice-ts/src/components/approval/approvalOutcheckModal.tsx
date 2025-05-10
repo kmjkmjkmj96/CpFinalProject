@@ -1,7 +1,6 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const ApprovalOutcheckModal = ({ onClose, onGoBack }) => {
+const ApprovalOutcheckModal = ({ onClose, onGoBack }:any) => {
   const navigate = useNavigate();
 
   const handleExit = () => {
@@ -35,7 +34,7 @@ const ApprovalOutcheckModal = ({ onClose, onGoBack }) => {
 };
 
 // ✅ **스타일 정의**
-const modalOverlay = {
+const modalOverlay:any = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -47,7 +46,7 @@ const modalOverlay = {
   alignItems: "center",
 };
 
-const modalContainer = {
+const modalContainer:any = {
   width: "500px",
   background: "white",
   borderRadius: "8px",
@@ -59,7 +58,7 @@ const modalContainer = {
   alignItems: "center",
 };
 
-const modalHeader = {
+const modalHeader:any = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -67,13 +66,13 @@ const modalHeader = {
   marginBottom: "20px",
 };
 
-const modalTitle = {
+const modalTitle:any = {
   fontSize: "16px",
   fontWeight: "700",
   color: "#202224",
 };
 
-const closeButton = {
+const closeButton:any = {
   position: "absolute",
   top: "10px",
   right: "15px",
@@ -84,7 +83,7 @@ const closeButton = {
   color: "black",
 };
 
-const messageContainer = {
+const messageContainer:any = {
   textAlign: "center",
   marginBottom: "20px",
 };
@@ -109,7 +108,7 @@ const buttonContainer = {
   width: "100%",
 };
 
-const backButton = {
+const backButton:any = {
   width: "220px",
   height: "45px",
   background: "#4880FF",
@@ -122,7 +121,7 @@ const backButton = {
   textAlign: "center",
 };
 
-const exitButton = {
+const exitButton:any = {
   width: "220px",
   height: "45px",
   background: "white",

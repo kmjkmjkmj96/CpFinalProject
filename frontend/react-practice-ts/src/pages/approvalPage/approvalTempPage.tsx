@@ -10,7 +10,7 @@ import axios from "axios";
 
 export const ApprovalTempPage = () => {
   const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [_posts, setPosts] = useState<any[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,30 +18,27 @@ export const ApprovalTempPage = () => {
 
   const userNo = useSelector((state: any) => state.user?.userNo) || sessionStorage.getItem("userNo");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userNo) return;
-      try {
-        console.log("✅ API 요청:", `http://localhost:8003/workly/api/approvalTemp/list/${userNo}`);
-        const response = await axios.get(`http://localhost:8003/workly/api/approvalTemp/list/${userNo}`);
-
-        if (response.status === 200 && Array.isArray(response.data)) {
-          console.log("✅ 데이터 로드 성공:", response.data);
-          setPosts(response.data);
-          setFilteredPosts(response.data);
-        } else if (response.status === 204) {
-          console.warn("⚠ 임시 저장 문서 없음");
-        } else {
-          console.error("❌ 예상치 못한 응답:", response);
-        }
-      } catch (error) {
-        console.error("🚨 임시저장 목록 조회 실패:", error.response?.data || error.message);
-      } finally {
-        setIsLoading(false);
+   const fetchData = async () => {
+    if (!userNo) return;
+    try {
+      const response = await axios.get(`http://localhost:8003/workly/api/approvalTemp/list/${userNo}`);
+      if (response.status === 200 && Array.isArray(response.data)) {
+        setPosts(response.data);
+        setFilteredPosts(response.data);
+      } else if (response.status === 204) {
+        console.warn("⚠ 임시 저장 문서 없음");
+      } else {
+        console.error("❌ 예상치 못한 응답:", response);
       }
-    };
+    } catch (error: any) {
+      console.error("🚨 임시저장 목록 조회 실패:", error.response?.data || error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchData(); // ✅ 이제 여기서도 정상 호출 가능
   }, [userNo]);
 
   return (

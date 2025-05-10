@@ -67,7 +67,7 @@ export const ApprovalReferencePage = () => {
         <div className="componentContainer1">
           <ApprovalHeader />
           <ApprovalSearchBar
-            onSearch={(params) => {
+            onSearch={(params:any) => {
               let result = [...posts];
 
               if (params.approvalType) {

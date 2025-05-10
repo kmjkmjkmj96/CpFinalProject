@@ -24,7 +24,7 @@ const OrgMemberPlus = ({ deptName, onComplete }: OrgMemberPlusProps) => {
   const [checkedMembers, setCheckedMembers] = useState<number[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [departments, setDepartments] = useState<{ deptNo: number; deptName: string }[]>([]);
-  const [positions, setPositions] = useState<{ positionNo: number; positionName: string }[]>([]);
+  const [_positions, setPositions] = useState<{ positionNo: number; positionName: string }[]>([]);
 
   // ✅ 부서 및 직급 데이터 가져오기
   useEffect(() => {
@@ -115,7 +115,7 @@ const OrgMemberPlus = ({ deptName, onComplete }: OrgMemberPlusProps) => {
       </div>
 
       <div style={{ margin: '10px 45px' }}>
-        <SearchClick />
+        <SearchClick onProfileClick={() => console.log("프로필 클릭됨")} />
       </div>
 
       <div style={{ overflowY: 'auto', maxHeight: '500px', paddingLeft: '30px' }}>

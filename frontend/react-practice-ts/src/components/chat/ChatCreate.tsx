@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import chatIcon from "../../assets/Images/chat/chatBiggest.png";
 import group from "../../assets/Images/chat/groupChat.png";
-import searchIcon from "../../assets/Images/chat/search.png"; // 🔍 검색 아이콘 이미지 임포트 (파일경로는 네 프로젝트에 맞게 수정해)
+import searchIcon from "../../assets/Images/chat/search.png"; 
 import { useEffect } from "react";
 
 
@@ -21,7 +21,7 @@ const ChatCreate = ({
   //     alert('채팅 종류를 선택해주세요!');
   //     return;
   //   }
-  //   console.log("ChatCreate - handleInviteClick 실행됨!", chatType, roomTitle); // ✅ 확인용 로그 추가
+  //   console.log("ChatCreate - handleInviteClick 실행됨!", chatType, roomTitle); 
   //   invitePeople(chatType, roomTitle);
   // };
 

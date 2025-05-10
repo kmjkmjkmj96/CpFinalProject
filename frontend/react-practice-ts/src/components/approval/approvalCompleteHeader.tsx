@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { format, addHours } from 'date-fns';
 import { ko } from 'date-fns/locale';
-//import { times } from "lodash";
+import { times } from "lodash";
 
 
 
@@ -16,8 +16,8 @@ export const ApprovalCompleteHeader = () => {
   const [writeUser, setWriteUser] = useState<{userName: string} | null>(null);
   const [attachments, setAttachments] = useState<{ fileName: string; fileUrl: string }[]>([]);
   const [_error, setError] = useState<string | null>(null); // ✅ 추가
-  const approvers = approvalLine.filter(line => line.type == '결재자');
-  const references = approvalLine.filter(line => line.type == '참조자');
+  const approvers = approvalLine.filter((line:any) => line.type == '결재자');
+  const references = approvalLine.filter((line:any) => line.type == '참조자');
   // redux에서 가져온 userNo
   const userNo = useSelector((state: any) => state.user.userNo);
   
@@ -176,7 +176,7 @@ export const ApprovalCompleteHeader = () => {
         <label style={labelStyle}>결재라인</label>
         <div style={approvalListContainerStyle}>
           {approvers.length > 0 ? (
-            approvers.map((line, index) => {
+            approvers.map((line:any, index) => {
               const formattedDate = convertToKST(line.approvalDate); // ✅ 개별 날짜 변환
               return (
                 <div key={index} style={approvalItemStyle}>
@@ -221,7 +221,7 @@ export const ApprovalCompleteHeader = () => {
         <label style={labelStyle}>참조</label>
         <div style={referenceContainerStyle}>
           {references.length > 0 ? (
-            references.map((ref, index) => (
+            references.map((ref:any, index) => (
               <span key={index} style={referenceItemStyle}>
                 {ref.deptName} / {ref.userName} {ref.positionName} 
               </span>
@@ -239,7 +239,7 @@ export const ApprovalCompleteHeader = () => {
   };
 
 // ✅ 상태 값을 문자열로 변환하는 함수 (approvalLineType이 '수신'이면 '수신' 표시)
-const getStatusLabel = (line) => {
+const getStatusLabel = (line:any) => {
   if (line.approvalLineType === "수신") {
     return "수신"; // ✅ approvalLineType이 '수신'이면 '수신' 표시
   }
@@ -254,7 +254,7 @@ const getStatusLabel = (line) => {
 };
 
 // ✅ 상태별 스타일 적용 함수 (approvalLineType이 '수신'이면 초록색 적용)
-const statusStyle = (line) => {
+const statusStyle:any = (line:any) => {
   if (line.approvalLineType === "수신") {
     return {
       padding: "4px 6px",
@@ -279,7 +279,7 @@ const statusStyle = (line) => {
 };
 
 // ✅ 상태별 색상 반환 함수 추가
-const getStatusColor = (status) => {
+const getStatusColor = (status:any) => {
   switch (status) {
     case 0: return "#666"; // 대기 (회색)
     case 1: return "#FFA500"; // 진행중 (오렌지색)
@@ -291,7 +291,7 @@ const getStatusColor = (status) => {
 
 
   // ✅ **컨테이너 스타일**
-  const containerStyle = {
+  const containerStyle:any = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -357,14 +357,14 @@ const getStatusColor = (status) => {
   };
   
   // ✅ **결재라인 스타일**
-  const approvalListContainerStyle = {
+  const approvalListContainerStyle:any = {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
     padding: "3px",
   };
   
-  const approvalItemStyle = {
+  const approvalItemStyle:any = {
     display: "grid",
     gridTemplateColumns: "1fr 0.5fr 0.6fr", // ✅ 첫 번째 컬럼을 적절히 조정하여 중앙 배치
     alignItems: "center",
@@ -381,7 +381,7 @@ const getStatusColor = (status) => {
   };
   
   // ✅ **참조자 컨테이너 스타일**
-  const referenceContainerStyle = {
+  const referenceContainerStyle:any = {
     display: "flex",
     gap: "10px",
     flexWrap: "wrap",

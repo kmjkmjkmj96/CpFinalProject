@@ -3,7 +3,7 @@ import search from '../../assets/images/icon/search.png';
 import { useEffect, useState } from 'react';
 import axios from '../../utils/CustomAxios';
 
-const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handleSearch, setCurrentPage }) => {
+const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handleSearch, setCurrentPage }:any) => {
     const [dept, setDept] = useState([]);
     const [position, setPosition] = useState([]);
 
@@ -15,7 +15,7 @@ const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handl
             })
     }, [category])
 
-    const handleCategoryChange = (e) => {
+    const handleCategoryChange = (e:any) => {
         setCategory({
             ...category,
             [e.target.name]: e.target.value
@@ -23,7 +23,7 @@ const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handl
         setCurrentPage(1)
     }
 
-    const handleSearchMember = (e) => {
+    const handleSearchMember = (e:any) => {
         setSearchMember(e.target.value);
         setCurrentPage(1)
     }
@@ -37,7 +37,7 @@ const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handl
         setSearchMember('');
     }
 
-    const handelEnter = (e) => {
+    const handelEnter = (e:any) => {
         if(e.key === 'Enter') {
             handleSearch();
         }
@@ -49,7 +49,7 @@ const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handl
                 <select name="cDept" value={category.cDept} className={styles.select} onChange={handleCategoryChange}>
                     <option value="0" >부서명</option>
                     {
-                        dept.map(function (e, i) {
+                        dept.map(function (e:any, _i) {
                             return (
                                 <option key={e.deptNo} value={e.deptNo}>{e.deptName}</option>
                             )
@@ -59,7 +59,7 @@ const SearchBar = ({ category, setCategory, searchMember, setSearchMember, handl
                 <select name="cPosi" value={category.cPosi} className={styles.select} onChange={handleCategoryChange}>
                     <option value="0">직급</option>
                     {
-                        position.map(function (e, i) {
+                        position.map(function (e:any, _i) {
                             return (
                                 <option key={e.positionNo} value={e.positionNo}>{e.positionName}</option>
                             )

@@ -19,7 +19,7 @@ function Header() {
   const location = useLocation();
   const { pathname } = location;
   const [openModal, setOpenModal] = useState(false);
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state:any) => state.user);
 
   const url = "http://localhost:8003/workly/uploads/profile/";
 
