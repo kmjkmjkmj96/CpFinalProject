@@ -4,15 +4,29 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { format, addHours } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { times } from "lodash";
+//import { times } from "lodash";
 
 
+interface ApprovalLine {
+  approvalDate?: string | number;
+  deptName?: string;
+  positionName?: string;
+  userName?: string;
+  status?: number;
+  approvalLineType?: string;
+  type: string; // '결재자' 또는 '참조자'
+}
+
+interface ApprovalData {
+  approvalType?: string;
+  approvalTitle?: string;
+}
 
 
 export const ApprovalCompleteHeader = () => {
   const {approvalNo} = useParams(); // URL에서 approvalNo 가져오기
-  const [approvalData, setApprovalData] = useState();
-  const [approvalLine, setApprovalLine] = useState([]);
+  const [approvalData, setApprovalData] = useState<ApprovalData | null>(null);
+  const [approvalLine, setApprovalLine] = useState<ApprovalLine[]>([]);
   const [writeUser, setWriteUser] = useState<{userName: string} | null>(null);
   const [attachments, setAttachments] = useState<{ fileName: string; fileUrl: string }[]>([]);
   const [_error, setError] = useState<string | null>(null); // ✅ 추가
@@ -20,7 +34,7 @@ export const ApprovalCompleteHeader = () => {
   const references = approvalLine.filter((line:any) => line.type == '참조자');
   // redux에서 가져온 userNo
   const userNo = useSelector((state: any) => state.user.userNo);
-  
+  console.log(userNo);
   const [_formattedDate, _setFormattedDate] = useState("N/A"); // 시간 이상함
 
   // ✅ date-fns를 활용한 시간 변환 함수
@@ -69,6 +83,7 @@ export const ApprovalCompleteHeader = () => {
       let timestamp = approvers[0].approvalDate;
 
       let convertedTime = convertToKST(timestamp);
+      console.log(convertedTime);
 
     }
   }, [approvers]);

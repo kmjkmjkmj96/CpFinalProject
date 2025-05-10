@@ -17,7 +17,7 @@ export const ApprovalFinishPost = ({
   filteredPosts,
   currentPage,
   postsPerPage,
-  setCurrentPage
+  //setCurrentPage
 }: ApprovalFinishPostProps) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -109,7 +109,7 @@ const emptyRowStyle = {
 
 const formatKST = (timestamp: number | string) => {
   if (!timestamp) return "N/A";
-
+  console.log(formatKST);
   let ts = Number(timestamp);
   if (ts.toString().length === 10) {
     ts *= 1000;

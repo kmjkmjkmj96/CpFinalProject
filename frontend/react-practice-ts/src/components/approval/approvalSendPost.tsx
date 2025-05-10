@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { addHours, format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import { RootState } from "../../store";
 import axios from "axios";
 
@@ -16,13 +16,13 @@ export const ApprovalSendPost = ({
   filteredPosts,
   currentPage,
   postsPerPage,
-  setCurrentPage
+  //setCurrentPage
 }: ApprovalPostProps) => {
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
   const userNo = useSelector((state: RootState) => state.user.userNo);
 
   // ✅ 13자리 숫자를 한국 시간(KST) 형식으로 변환하는 함수

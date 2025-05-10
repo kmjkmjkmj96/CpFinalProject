@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import React from "react";
+
 
 interface Employee {
   USER_NO: number;
@@ -106,7 +106,7 @@ const ApprovalCCModal = ({ onClose, selectedCCUsers, setSelectedCCUsers }:any) =
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="2" style={{textAlign: "center", padding: "10px", color: "gray"}}>
+                    <td colSpan={2} style={{textAlign: "center", padding: "10px", color: "gray"}}>
                       검색 결과 없음
                     </td>
                   </tr>

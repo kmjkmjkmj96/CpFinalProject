@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ApprovalMark } from "./approvalMark";
+import { addHours, format} from "date-fns";
+import { ko } from "date-fns/locale";
 
 interface ApprovalPostProps {
   filteredPosts: any[];
@@ -14,6 +16,7 @@ export const ApprovalPost = ({
   postsPerPage,
 }: ApprovalPostProps) => {
   const navigate = useNavigate();
+  console.log(navigate);
 
   // ✅ 현재 페이지에 맞는 게시글 계산
   const indexOfLastPost = currentPage * postsPerPage;
@@ -84,6 +87,8 @@ const emptyRowStyle = {
 
 const formatKST = (timestamp: number | string) => {
   if (!timestamp) return "N/A";
+
+  console.log(formatKST);
 
   let ts = Number(timestamp);
   if (ts.toString().length === 10) {

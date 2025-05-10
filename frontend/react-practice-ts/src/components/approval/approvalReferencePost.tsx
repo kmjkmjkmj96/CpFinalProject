@@ -18,7 +18,7 @@ export const ApprovalReferencePost = ({
  filteredPosts,
   currentPage,
   postsPerPage,
-  setCurrentPage
+  //setCurrentPage
 }: ApprovalReferencePostProps) => {
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -36,7 +36,7 @@ export const ApprovalReferencePost = ({
   // 로그인한 유저의 userNO
   const userNo = useSelector((state: any) => state.user.userNo);
   // 게시글 목록
-  const [posts, setPosts] = useState([]);
+  const [_posts, setPosts] = useState([]);
   
   useEffect(() => {
     const fetchApprovalPosts = async () => {
