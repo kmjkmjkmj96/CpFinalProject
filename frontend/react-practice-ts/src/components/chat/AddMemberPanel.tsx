@@ -11,6 +11,7 @@ interface ChatRoomProps {
 }
 
 interface AddMemberPanelProps {
+  allEmployees: Member[];
   currentMembers: Member[];    // 이미 채팅방에 있는 멤버들
   room: ChatRoomProps;         // room.chatRoomNo로 접근
   onClose: () => void;
@@ -27,6 +28,8 @@ const AddMemberPanel = ({
   const [allEmployees, setAllEmployees] = useState<Member[]>([]);
   const dispatch = useDispatch();
   const memberInvite = useSelector((state: RootState) => state.chat.memberInvite);
+
+  console.log(memberInvite);
 
   // 백엔드에서 전체 사원 목록 불러오기
   useEffect(() => {

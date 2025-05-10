@@ -1,8 +1,8 @@
 import axios from "axios";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState } from "react";
+//import { useSelector } from "react-redux";
 
-const ApprovalFavoriteLineModal = ({ onClose, approvalLines, refreshFavoriteList, userNo }) => {
+const ApprovalFavoriteLineModal = ({ onClose, approvalLines, refreshFavoriteList, userNo }:any) => {
   const [favoriteName, setFavoriteName] = useState("");
   const [loading, setLoading] = useState(false)
 
@@ -97,7 +97,7 @@ const ApprovalFavoriteLineModal = ({ onClose, approvalLines, refreshFavoriteList
 };
 
 // ✅ **스타일 정의**
-const modalOverlay = {
+const modalOverlay:any = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -109,7 +109,7 @@ const modalOverlay = {
   alignItems: "center",
 };
 
-const modalContainer = {
+const modalContainer:any = {
   width: "459px",
   height: "205px",
   background: "white",
@@ -122,7 +122,7 @@ const modalContainer = {
   alignItems: "center",
 };
 
-const modalHeader = {
+const modalHeader:any = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -131,13 +131,13 @@ const modalHeader = {
   position: "relative",
 };
 
-const modalTitle = {
+const modalTitle:any = {
   fontSize: "16px",
   fontWeight: "700",
   textAlign: "center",
 };
 
-const closeButton = {
+const closeButton:any = {
   position: "absolute",
   top: "-10px",
   right: "-10px",
@@ -155,7 +155,7 @@ const closeButton = {
   zIndex: 1000,
 };
 
-const inputStyle = {
+const inputStyle:any = {
   width: "90%",
   height: "34px",
   borderRadius: "4px",
@@ -166,7 +166,7 @@ const inputStyle = {
   marginBottom: "20px",
 };
 
-const saveButton = {
+const saveButton :any= {
   width: "90%",
   height: "41px",
   background: "#4880FF",

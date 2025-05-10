@@ -26,7 +26,7 @@ const ChatContainer = ({
         height: "560px", 
         position: "relative", 
         display: "flex", 
-        overflowX: "hidden"  // 📌 좌우 스크롤 방지
+        overflowX: "hidden" 
       }}
     >
       {/* 전체 배경 */}

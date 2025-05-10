@@ -68,7 +68,7 @@ export const ApprovalFinishPage = () => {
         <Header />
         <div className="componentContainer1">
           <ApprovalHeader />
-          <ApprovalSearchBar onSearch={(params) => {
+          <ApprovalSearchBar onSearch={(params:any) => {
             let result = [...posts];
 
             if (params.approvalType) {

@@ -10,7 +10,7 @@ const Attendance = () => {
 
     const url = "http://localhost:8003/workly/uploads/profile/";
 
-    let user = useSelector((state) => {
+    let user = useSelector((state:any) => {
         return state.user;
     });
 

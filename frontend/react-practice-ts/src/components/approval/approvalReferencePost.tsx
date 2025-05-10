@@ -158,7 +158,7 @@ const getStatusText = (status: number) => {
   }
 };
 
-const getStatusStyle = (status: number) => {
+const getStatusStyle:any = (status: number) => {
   let baseStyle = {
     padding: "5px 10px",
     borderRadius: "4px",
@@ -188,7 +188,7 @@ const containerStyle = {
     padding: "20px",
   };
   
-const tableStyle = {
+const tableStyle:any = {
     width: "90%",
     borderCollapse: "collapse",
     textAlign: "center",
@@ -212,12 +212,12 @@ const tdStyle = {
   color: "#202224",
 };
 
-const tdTitleStyle = {
+const tdTitleStyle:any = {
   ...tdStyle,
   textAlign: "left",
 };
 
-const tdIconStyle = {
+const tdIconStyle:any = {
   width: "20px",
   textAlign: "center",
 };

@@ -69,3 +69,12 @@ export interface ChatMessage {
 };
 
 
+export interface ChatRoom {
+  chatRoomNo: number;
+  roomTitle: string;
+  chatType: string;
+  unreadCount?: number;
+  isActive?: boolean;
+  bellSetting: 'Y' | 'N';
+  createdChat?: string;
+}

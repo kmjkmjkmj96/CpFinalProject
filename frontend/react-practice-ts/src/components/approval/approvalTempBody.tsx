@@ -4,7 +4,7 @@ import { ko } from "date-fns/locale";
 
 interface ApprovalPostProps {
   selectedPosts: number[];
-  setSelectedPosts: (posts: number[]) => void;
+  setSelectedPosts: React.Dispatch<React.SetStateAction<number[]>>;
   filteredPosts: any[];
   currentPage: number;
   postsPerPage: number;
@@ -73,7 +73,7 @@ export const ApprovalTempBody = ({
                     type="checkbox"
                     checked={selectedPosts.includes(post.tempNo)}
                     onChange={() =>
-                      setSelectedPosts(prev =>
+                      setSelectedPosts((prev: number[]) =>
                         prev.includes(post.tempNo) ? prev.filter(item => item !== post.tempNo) : [...prev, post.tempNo]
                       )
                     }
@@ -116,7 +116,7 @@ const containerStyle = {
 };
 
 // ✅ 테이블 스타일 (오른쪽으로 이동 & 폭 넓힘)
-const tableStyle = {
+const tableStyle:any = {
   width: "90%", // ✅ 기존 90% → 95%로 넓힘
   borderCollapse: "collapse",
   textAlign: "center",
@@ -140,7 +140,7 @@ fontSize: "12px",
 color: "#202224",
 };
 
-const tdTitleStyle = {
+const tdTitleStyle:any = {
 ...tdStyle,
 textAlign: "left",
 };
@@ -150,6 +150,7 @@ const tdIconStyle = {
 width: "20px", // 아이콘 크기 조정
 textAlign: "center",
 };
+console.log(tdIconStyle);
 
 const statusStyle = {
   padding: "5px 10px",

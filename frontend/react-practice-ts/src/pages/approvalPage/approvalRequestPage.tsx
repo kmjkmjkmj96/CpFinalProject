@@ -14,7 +14,7 @@ export const ApprovalRequestPage = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const postsPerPage = 10;
 
   // ✅ 로그인한 유저 정보 가져오기
@@ -23,6 +23,7 @@ export const ApprovalRequestPage = () => {
   const userNo = userNoFromRedux || userNoFromSession;
 
   const navigate = useNavigate();
+  console.log(navigate);
 
   // ✅ 진행함 문서 목록 불러오기
   useEffect(() => {

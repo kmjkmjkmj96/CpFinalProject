@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+//import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+//import axios from "axios";
 import { format, addHours } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ApprovalMark } from "./approvalMark";
@@ -17,6 +17,8 @@ export const ApprovalRequestPost = ({
   postsPerPage
 }: ApprovalRequestPostProps) => {
   const navigate = useNavigate();
+
+  console.log(navigate);
 
   // ✅ 13자리 숫자를 한국 시간(KST) 형식으로 변환하는 함수
   const formatKST = (timestamp: number | string) => {
@@ -153,6 +155,8 @@ const paginationButtonStyle = {
   borderRadius: '4px',
   cursor: 'pointer',
 };
+
+console.log(paginationStyle,paginationButtonStyle);
 
 // ✅ 상태 텍스트 변환 함수
 const getStatusText = (status: number) => {

@@ -7,11 +7,11 @@ import { fetchNotifications, clearNotification } from "../../features/approvalNo
 export const ApprovalHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [_activeIndex, setActiveIndex] = useState<number | null>(null);
   const dispatch = useDispatch();
 
   // Redux에서 알림 개수 가져오기 (타입 명시)
-  const notifications = useSelector((state: RootState) => state.notifications);
+  const notifications:any = useSelector((state: RootState) => state.notifications);
   const userNo = useSelector((state: RootState) => state.user.userNo);
 
   // 알림 데이터 가져오기 (백엔드 연동)
@@ -91,14 +91,14 @@ const buttonStyle = {
   position: "relative", // 알림 뱃지 스타일 적용을 위해 추가
 };
 
-const activeButtonStyle = {
+const activeButtonStyle:any= {
   ...buttonStyle,
   background: "#4880FF",
   color: "white",
   border: "0.3px solid #4880FF",
 };
 
-const notificationBadgeStyle = {
+const notificationBadgeStyle:any = {
   position: "absolute",
   top: -5, // 뱃지 위치 조정
   right: -5,

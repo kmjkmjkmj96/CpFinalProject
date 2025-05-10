@@ -21,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, selectedEvent, setEvents
   const [selectedColor, setSelectedColor] = useState("#000000");
 
   // ✅ Redux에서 로그인한 사용자 정보 가져오기
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state:any) => state.user);
   const userNo = user?.userNo; // 현재 로그인한 사용자 번호
   const deptNo = user?.deptNo; // 현재 로그인한 사용자의 부서 번호
 

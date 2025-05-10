@@ -1,6 +1,6 @@
 import Pagination from "../common/Pagination"; // body에 삭제버튼 들어가야하는 경우 사용하는 푸터
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+//import axios from 'axios';
+//import { useNavigate } from 'react-router-dom';
 
 interface ApprovalFooterProps {
   pageInfo: {

@@ -36,7 +36,7 @@ export const ApprovalWritePage = () => {
     attachments: [], 
   });
 
-  const [approvalMemoData, setApprovalMemoData] = useState({
+  const [_approvalMemoData, setApprovalMemoData] = useState({
     userNo: userNo,
     approvalNo: null, // 결재 문서 저장 후 업데이트 필요
     memoContent: "",
@@ -95,7 +95,7 @@ export const ApprovalWritePage = () => {
 
       // 4️. 결재라인 저장
       if (approvalData.approvalLine?.length > 0) {
-        const approvalLineData = [approvalData.approvalLine.map(emp => ({
+        const approvalLineData = [approvalData.approvalLine.map((emp:any) => ({
           approvalNo: newApprovalNo,
           approvalLineType: emp.approvalType,
           type: emp.type,
@@ -103,7 +103,7 @@ export const ApprovalWritePage = () => {
           userNo: emp.USER_NO,
         })),
           // 참조자 추가 
-        ...selectedCCUsers.map(emp => ({
+        ...selectedCCUsers.map((emp:any) => ({
           approvalNo: newApprovalNo,
           type: "참조자",
           approvalLevel: 1, // 참조자는 레벨 1로 설정
@@ -179,7 +179,7 @@ export const ApprovalWritePage = () => {
 }
 
 //  **스타일 정의 (TSX 내부에서 적용)**
-const scrollableContentStyle = {
+const scrollableContentStyle:any = {
   overflowY: "auto", // 세로 스크롤바 적용
   maxHeight: "calc(100vh - 100px)", // 화면 높이에서 일부 여백 제외 (조정 가능)
   paddingRight: "10px", // 스크롤바 공간 확보

@@ -27,12 +27,12 @@ const CompanyEnroll = () => {
     });
 
     const [addressApi, setAddressApi] = useState("");
-    const [profileImg, setProfileImg] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const fileInputRef = useRef(null);
+    const [profileImg, setProfileImg]:any = useState(null);
+    const [preview, setPreview]:any = useState(null);
+    const fileInputRef:any = useRef(null);
     const navigate = useNavigate();
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e:any) => {
         const file = e.target.files[0];
 
         if (file.size > 3 * 1024 * 1024) {
@@ -54,7 +54,7 @@ const CompanyEnroll = () => {
     };
 
     // ✅ 회사 정보 입력 핸들러
-    const handleCompanyChange = (e) => {
+    const handleCompanyChange = (e:any) => {
         setCompany({
             ...company,
             [e.target.name]: e.target.value,
@@ -62,7 +62,7 @@ const CompanyEnroll = () => {
     };
 
     // ✅ 멤버 정보 입력 핸들러
-    const handleChange = (e) => {
+    const handleChange = (e:any) => {
         setMember({
             ...member,
             [e.target.name]: e.target.value,
@@ -81,14 +81,14 @@ const CompanyEnroll = () => {
             console.log("백엔드 응답의 companyId:", response.data?.companyId);
 
             return response.data.companyId; // 회사 ID 반환
-        } catch (error) {
+        } catch (error:any) {
             alert(error.response?.data?.msg || "회사 정보 등록 실패");
             throw new Error("회사 등록 실패");
         }
     };
 
     // ✅ 멤버 정보 등록 함수 (2)
-    const submitMemberInfo = async (companyId) => {
+    const submitMemberInfo = async (companyId:any) => {
         console.log("전송되는 companyId:", companyId)
 
         const formData = new FormData();

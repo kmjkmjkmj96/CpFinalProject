@@ -1,16 +1,16 @@
 import { Editor } from "@tinymce/tinymce-react";
-import { useRef, useState, useEffect } from "react";
+import {  useState, useEffect } from "react";
 
-const ApprovalWriteBody = ({ approvalData, setApprovalData }) => {
-  const editorRef = useRef(null);
-
+const ApprovalWriteBody = ({ approvalData, setApprovalData }:any) => {
+  //const editorRef = useRef(null);
+  
 
   // 에디터의 초기 값 설정
   const [editorContent, setEditorContent] = useState(approvalData.approvalContent || "");
 
   useEffect(() => {
-    setApprovalData((prevDataL) => ({
-      ...prevData,
+    setApprovalData((_prevDataL:any) => ({
+      ..._prevDataL,
       approvalContent: editorContent,
     }));
   }, [editorContent]);

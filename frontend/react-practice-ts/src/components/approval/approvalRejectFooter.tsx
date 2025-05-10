@@ -1,4 +1,4 @@
-import axios from "axios";
+//import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 interface ApprovalRejectFooterProps {
@@ -7,7 +7,7 @@ interface ApprovalRejectFooterProps {
 }
 
 export const ApprovalRejectFooter = ({ 
-  selectedPosts, 
+  //selectedPosts, 
   onDelete 
 }: ApprovalRejectFooterProps) => {
   const navigate = useNavigate();

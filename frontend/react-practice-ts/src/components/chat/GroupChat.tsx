@@ -6,7 +6,7 @@ import profile from "../../assets/Images/chat/profile.png";
 import bell from "../../assets/Images/chat/bell.png";
 import personplus from "../../assets/Images/chat/personPlus.png";
 import exit from "../../assets/Images/chat/exit.png";
-import { Member } from "../../type/chatType";
+import { Member, ChatRoom } from "../../type/chatType";
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko'; 
 import utc from "dayjs/plugin/utc";
@@ -20,11 +20,6 @@ const backendHost = "192.168.200.115";
 
 dayjs.extend(utc);
 
-
-interface ChatRoom {
-  chatRoomNo: number;
-  roomTitle: string;
-}
 
 interface ChatMessage {
   chatNo: number;
@@ -399,7 +394,7 @@ const handleClose = async () => {
 
 
 
-const updateUserChatStatus = async (chatNo:number) => {
+const updateUserChatStatus:any = async () => {
   try {
       await axios.put(`http://${backendHost}:8003/workly/api/chat/updateStatus/${room.chatRoomNo}/${currentUser.userNo}`);
       console.log("✅ [프론트엔드] updateUserChatStatus 요청 완료");

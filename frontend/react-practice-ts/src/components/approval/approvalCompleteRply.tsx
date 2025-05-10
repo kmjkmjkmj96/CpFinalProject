@@ -151,7 +151,7 @@ const ApprovalCompleteReply: React.FC<ApprovalCompleteReplyProps> = () => {
 };
 
 // ✅ **스타일 정의**
-const containerStyle = {
+const containerStyle:any = {
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -202,7 +202,7 @@ const commentTextStyle = {
   color: "#666",
 };
 
-const editTextAreaStyle = {
+const editTextAreaStyle:any = {
   width: "100%",
   height: "60px",
   borderRadius: "4px",

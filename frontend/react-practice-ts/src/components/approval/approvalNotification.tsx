@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
@@ -48,13 +48,15 @@ const NotificationModal = () => {
       "결재 참조": currentState.approvalReference - (previousState.approvalReference || 0),
       "결재 완료": currentState.approvalFinish - (previousState.approvalFinish || 0),
       "결재 반려": currentState.approvalReject - (previousState.approvalReject || 0),
-    };
+    } as const;
+
+    type ChangeKey = keyof typeof changes;
 
     // ✅ 알림 우선순위 정의 (결재 참조가 결재 완료보다 우선)
     const priorityOrder = ["결재 요청", "결재 수신", "결재 참조", "결재 반려", "결재 완료"];
 
     // ✅ 증가한 알림 유형을 필터링하여 우선순위대로 정렬
-    const updatedNotifications = Object.keys(changes)
+    const updatedNotifications = (Object.keys(changes) as ChangeKey[])
       .filter(key => changes[key] > 0)
       .sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b));
 

@@ -20,7 +20,7 @@ const Weather = () => {
     const [forecast, setForecast] = useState([]);
 
     const getCurrentLocation = () => {
-        navigator.geolocation.getCurrentPosition((position) => {
+        navigator.geolocation.getCurrentPosition((_position) => {
             // let lat = position.coords.latitude;
             // let lon = position.coords.longitude;
             let lat = "37.5683"; // 서울 좌표
@@ -38,12 +38,12 @@ const Weather = () => {
             const list = res.data.list;
             
             // dt_txt 09시가 한국시간으로 18시 -> 9시간 시차  => 한국 시간 15시 = 06시
-            let filteredList = list.filter(data =>
+            let filteredList = list.filter((data:any)=>
                 data.dt_txt.includes("06:00:00")
             )
 
             // 필요한 데이터만 매핑
-            const data = filteredList.map(data => {
+            const data = filteredList.map((data:any) => {
                 const timeStamp = new Date(data.dt * 1000);
                 const day = timeStamp.toString().split(" ")[0]; // 요일 추출
                 
@@ -72,9 +72,8 @@ const Weather = () => {
                 `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
             );
             
-            const weatherId: number = res.data.weather[0].id;
-const weatherKo = weatherDescKo[weatherId];
- // id 찾아서 매칭 후 description 한글 번역
+            const weatherId = res.data.weather[0].id;
+            const weatherKo = weatherDescKo[weatherId]; // id 찾아서 매칭 후 description 한글 번역
 
             const weatherIcon = res.data.weather[0].icon;
             const weatherIconAdrs = `https://openweathermap.org/img/wn/${weatherIcon}@2x.png`; // 날씨 아이콘 

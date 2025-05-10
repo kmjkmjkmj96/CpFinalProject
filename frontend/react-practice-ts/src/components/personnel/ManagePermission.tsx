@@ -4,8 +4,8 @@ import styles from "../../styles/personnel/ManagePermission.module.css"
 const ManagePermission = () => {
   const [openSections, setOpenSections] = useState({ inhumanResources: true });
 
-  const toggleSection = (section) => {
-    setOpenSections((prev) => ({
+  const toggleSection = (section:any) => {
+    setOpenSections((prev:any) => ({
       ...prev,
       [section]: !prev[section],
     }));

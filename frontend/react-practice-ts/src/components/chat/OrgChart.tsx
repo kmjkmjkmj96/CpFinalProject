@@ -5,9 +5,11 @@ import totalprofileIcon from "../../assets/Images/chat/totalprofile.png";
 import dropdownIcon from "../../assets/Images/chat/dropdown2.png";
 import plusIcon from "../../assets/Images/chat/Plus circle.png";
 import SearchClick from "./SearchClick";
-import { Member } from "../../type/chatType"; // 멤버 타입이 별도로 있을 경우
+import { Member, Department } from "../../type/chatType"; // 멤버 타입이 별도로 있을 경우
+
 
 interface OrgChartProps {
+  departments: Department[];
   onOpenCreateOrg: () => void;
 }
 

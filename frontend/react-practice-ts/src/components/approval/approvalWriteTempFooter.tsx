@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export const ApprovalWriteTempFooter = ({ approvalData, setApprovalData }) => {
-  const navigate = useNavigate();
+export const ApprovalWriteTempFooter = ({ approvalData, setApprovalData }:any) => {
+  //const navigate = useNavigate();
 
   // ✅ 임시저장 수정 또는 저장
   const handleTempSave = async () => {
@@ -43,12 +43,12 @@ export const ApprovalWriteTempFooter = ({ approvalData, setApprovalData }) => {
         alert("임시저장 완료!");
 
         // ✅ 새롭게 생성된 tempNo를 state에 반영
-        setApprovalData((prevData) => ({
+        setApprovalData((prevData:any) => ({
           ...prevData,
           tempNo: response.data.tempNo,
         }));
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error("🚨 임시저장 실패:", error.response?.data || error.message);
       alert("임시 저장에 실패했습니다. 다시 시도해주세요.");
     }

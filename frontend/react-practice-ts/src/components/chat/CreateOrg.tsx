@@ -246,7 +246,7 @@ const CreateOrg = ({ onComplete, onClose }: CreateOrgProps) => {
         onClick={() => setIsSearching(true)}
       >
         {selectedMembers.length > 0
-          ? `${selectedMembers.map((m) => m.name).join(', ')}`
+          ? `${selectedMembers.map((m:any) => m.name).join(', ')}`
           : '이름을 입력하세요'}
         <img
           src={searchIcon}

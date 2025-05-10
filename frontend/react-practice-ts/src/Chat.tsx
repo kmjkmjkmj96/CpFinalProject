@@ -17,21 +17,13 @@ import OrgChart from "./components/chat/OrgChart";
 import CreateOrg from "./components/chat/CreateOrg";
 import { Department, Member, defaultMember } from "./type/chatType";
 import Alarm from "./components/chat/Alarm";
-import { ChatMessage } from "./type/chatType"; 
+import { ChatMessage, ChatRoom} from "./type/chatType"; 
 import AddMemberPanel from "./components/chat/AddMemberPanel";
 import axios from "axios";
 import ChatModal from "./ChatModal";
 import { useStompClient } from "./StompContext";
 
-interface ChatRoom {
-  chatRoomNo: number;
-  roomTitle: string;
-  chatType: string;
-  unreadCount?: number;
-  isActive?: boolean;
-  bellSetting: 'Y' | 'N';
-  createdChat?: string;
-}
+
 
 interface CurrentUser {
   userNo: number;
@@ -48,7 +40,7 @@ interface ChatProps {
   onClose: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
+const Chat: React.FC<ChatProps> = ({ currentUser }) => {
   
 
   // ---------- 여러 UI 상태 ----------
@@ -70,7 +62,7 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
   const [isAlarmListOpen, setIsAlarmListOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [chatList, setChatList] = useState<ChatRoom[]>([]);
-  const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
+  const [_currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [isAddMemberPanelOpen, setIsAddMemberPanelOpen] = useState(false);
   const [currentMembers, setCurrentMembers] = useState<Member[]>([]);
   
@@ -91,7 +83,7 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
       `/sub/chatRoom/${chatRoomNo}`,
       frame => {
         const payload = JSON.parse(frame.body);
-        // TODO: payload 처리 (chatMessages 업데이트 등)
+        console.log(payload);
       }
     );
     return () => {
@@ -107,7 +99,7 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
 
     const sub = client.subscribe(`/sub/chatRoom/${chatRoomNo}`, frame => {
       const payload = JSON.parse(frame.body);
-      // TODO: 메시지/UNREAD_UPDATE 처리
+      console.log(payload);
     });
     return () => sub.unsubscribe();
   }, [client, chatRoomNo]);
@@ -124,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
   }, [currentUser.userNo]);
 
   // ---------- 공지방 or 일반방 (초기값 0번 방) ----------
-  const [activeChatRoom, setActiveChatRoom] = useState<ChatRoom | null>({
+  const [_activeChatRoom, _setActiveChatRoom] = useState<ChatRoom | null>({
     chatRoomNo: 0,
     roomTitle: "사내 공지 톡방",
     chatType: "NOTICE",
@@ -364,7 +356,6 @@ const Chat: React.FC<ChatProps> = ({ currentUser, onClose }) => {
                 room={selectedChatRoom}
                 onClose={() => setIsAddMemberPanelOpen(false)}
                 onConfirm={newMembers => {
-                  console.log("✅ 멤버 추가됨:", newMembers);
                   setCurrentMembers([...currentMembers, ...newMembers]);
                   setIsAddMemberPanelOpen(false);
                 }}

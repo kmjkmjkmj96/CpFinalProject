@@ -23,7 +23,7 @@ interface Member {
 const SearchMember = ({
   chatType,
   roomTitle,
-  member,
+  //member,
   onComplete,
 }: {
   chatType: string;

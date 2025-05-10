@@ -22,9 +22,9 @@ const CreateEmployee = () => {
     });
     
     const [addressApi, setAddressApi] = useState("");
-    const [profileImg, setProfileImg] = useState(null); // 프로필 이미지
-    const [preview, setPreview] = useState(null); // 프로필 이미지 미리보기
-    const fileInputRef = useRef(null);
+    const [profileImg, setProfileImg]:any = useState(null); // 프로필 이미지
+    const [preview, setPreview]:any = useState(null); // 프로필 이미지 미리보기
+    const fileInputRef:any = useRef(null);
     const companyId = useSelector((state: any) => state.user.companyId);
 
     const navigate = useNavigate();
@@ -41,7 +41,7 @@ const CreateEmployee = () => {
         setPreview(URL.createObjectURL(file));
     }
 
-    const handleFileCancle = (e:any) => {
+    const handleFileCancle = (_e:any) => {
         setPreview(null);
         setProfileImg(null);
     }
